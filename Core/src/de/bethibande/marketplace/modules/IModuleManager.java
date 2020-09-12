@@ -1,4 +1,8 @@
-package de.bethibande.marketplace.moduleloader;
+package de.bethibande.marketplace.modules;
+
+import de.bethibande.marketplace.moduleloader.IModule;
+import de.bethibande.marketplace.moduleloader.IModuleHandle;
+import de.bethibande.marketplace.moduleloader.IModuleLoader;
 
 import java.util.List;
 
@@ -14,6 +18,8 @@ public interface IModuleManager {
     List<IModuleHandle> getHandles();
     // get an IModule instance by module name
     IModule getModuleByName(String name);
+    // get the module loader instance
+    IModuleLoader getModuleLoader();
     // unload all modules (not recommended, rather restart application)
     void unloadAllModules();
 

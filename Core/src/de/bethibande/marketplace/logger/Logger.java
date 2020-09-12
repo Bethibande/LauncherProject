@@ -1,6 +1,6 @@
 package de.bethibande.marketplace.logger;
 
-import de.bethibande.marketplace.bootstrap.IServiceBootstrap;
+import de.bethibande.marketplace.bootstrap.IService;
 
 import java.io.*;
 import java.util.Date;
@@ -15,13 +15,13 @@ public class Logger implements ILogger {
         if(file.exists()) {
             if(!file.delete()) {
                 System.err.println("Error while initializing the logger: Old log file couldn't be deleted!");
-                System.exit(IServiceBootstrap.EXIT_COULD_NOT_DELETE_LOG_FILE);
+                System.exit(IService.EXIT_COULD_NOT_DELETE_LOG_FILE);
             }
         }
         try {
             if(!file.createNewFile()) {
                 System.err.println("Error while initializing the logger: The log file couldn't be created or is already existing!");
-                System.exit(IServiceBootstrap.EXIT_COULD_NOT_CREATE_LOG_FILE);
+                System.exit(IService.EXIT_COULD_NOT_CREATE_LOG_FILE);
             }
             // open outputstream and create writer
             writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(file)));

@@ -23,6 +23,8 @@ public interface IModuleLoader {
     void disableAllModules();
     // unload/destroy all the classloaders and modules
     void unloadAllModules();
+    // unload/destroy a specific module and its classloader
+    void unloadModule(IModuleHandle handle);
     // get all the loaded module handles
     List<IModuleHandle> getHandles();
 

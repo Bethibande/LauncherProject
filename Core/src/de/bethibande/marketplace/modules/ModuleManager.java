@@ -1,9 +1,13 @@
-package de.bethibande.marketplace.moduleloader;
+package de.bethibande.marketplace.modules;
+
+import de.bethibande.marketplace.moduleloader.*;
+import lombok.Getter;
 
 import java.util.List;
 
 public class ModuleManager implements IModuleManager {
 
+    @Getter
     private IModuleLoader moduleLoader;
 
     @Override

@@ -1,6 +1,6 @@
 package de.bethibande.marketplace.bootstrap;
 
-public interface IServiceBootstrap {
+public interface IService {
 
     int EXIT_COULD_NOT_DELETE_LOG_FILE = 0x100000;
     int EXIT_COULD_NOT_CREATE_LOG_FILE = 0x110000;

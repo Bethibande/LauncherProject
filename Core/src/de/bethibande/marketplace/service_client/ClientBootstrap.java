@@ -1,9 +1,9 @@
 package de.bethibande.marketplace.service_client;
 
 import de.bethibande.marketplace.bootstrap.IArgumentParser;
-import de.bethibande.marketplace.bootstrap.IServiceBootstrap;
+import de.bethibande.marketplace.bootstrap.IService;
 
-public class ClientBootstrap implements IServiceBootstrap {
+public class ClientBootstrap implements IService {
 
     public void bootstrap(IArgumentParser args) {
 

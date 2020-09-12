@@ -1,7 +1,10 @@
 package de.bethibande.marketplace.moduleloader;
 
+import com.google.gson.Gson;
 import de.bethibande.marketplace.Core;
-import de.bethibande.marketplace.bootstrap.IServiceBootstrap;
+import de.bethibande.marketplace.bootstrap.IService;
+import de.bethibande.marketplace.modules.ModuleConfigManager;
+import de.bethibande.marketplace.utils.FileUtils;
 import lombok.Getter;
 
 import java.io.*;
@@ -29,12 +32,14 @@ public class ModuleLoader implements IModuleLoader {
     private static Field module_description_field;
     private static Field module_handle_field;
     private static Field module_manager_field;
+    private static Field module_configManager_field;
 
     static {
         try {
             module_description_field = Module.class.getDeclaredField("description");
             module_handle_field = Module.class.getDeclaredField("handle");
             module_manager_field = Module.class.getDeclaredField("manager");
+            module_configManager_field = Module.class.getDeclaredField("configManager");
         } catch(NoSuchFieldException e) {
             e.printStackTrace();
         }
@@ -45,13 +50,13 @@ public class ModuleLoader implements IModuleLoader {
         if(!IModuleLoader.modulesPath.exists()) {
             if(!IModuleLoader.modulesPath.mkdir()) {
                 Core.loggerInstance.logError("Couldn't create modules directory!");
-                System.exit(IServiceBootstrap.EXIT_COULD_NOT_CREATE_MODULES_PATH);
+                System.exit(IService.EXIT_COULD_NOT_CREATE_MODULES_PATH);
             }
         }
         if(!IModuleLoader.moduleConfigPath.exists()) {
             if(!IModuleLoader.moduleConfigPath.mkdir()) {
                 Core.loggerInstance.logError("Couldn't create modules directory!");
-                System.exit(IServiceBootstrap.EXIT_COULD_NOT_CREATE_MODULES_CONFIG_PATH);
+                System.exit(IService.EXIT_COULD_NOT_CREATE_MODULES_CONFIG_PATH);
             }
         }
     }
@@ -124,6 +129,7 @@ public class ModuleLoader implements IModuleLoader {
                     SimpleModuleHandle handle = new SimpleModuleHandle(description, module, classLoader, moduleFile, new File(IModuleLoader.moduleConfigPath + "/" + description.getName() + "/"));
                     handles.add(handle);
                     setModuleVars((Module)module, description, handle);
+                    loadConfigManager(module);
                     Core.loggerInstance.logMessage("Injected module: " + description.getName());
                 }
             } catch(MalformedURLException e) {
@@ -140,6 +146,37 @@ public class ModuleLoader implements IModuleLoader {
         }
     }
 
+    private void loadConfigManager(IModule module) {
+        ModuleConfigManager manager = null;
+        try {
+            if (!module.getHandle().getModuleConfigPath().exists()) {
+                manager = new ModuleConfigManager(module, new ArrayList<>());
+            } else {
+                File managerFile = new File(module.getHandle().getModuleConfigPath() + "/configs.json");
+                if (managerFile.exists()) {
+                    String json = FileUtils.readFile(managerFile).get(0);
+                    manager = new Gson().fromJson(json, ModuleConfigManager.class);
+                } else manager = new ModuleConfigManager(module, new ArrayList<>());
+            }
+        } catch(Exception e) {
+            Core.loggerInstance.logError("Error while loading module: " + module.getName() + ", couldn't load the module config manager.");
+            e.printStackTrace();
+        }
+        if (manager == null) {
+            Core.loggerInstance.logError("Error while loading module: " + module.getName() + ", couldn't load the module config manager.");
+            unloadModule(module.getHandle());
+        }
+
+        try {
+            module_configManager_field.setAccessible(true);
+            module_configManager_field.set(module, manager);
+            module_configManager_field.setAccessible(false);
+        } catch(IllegalAccessException e) {
+            e.printStackTrace();
+        }
+
+    }
+
     @Override
     // calls the onEnable method of all the injected modules
     public void enableAllModules() {
@@ -152,8 +189,11 @@ public class ModuleLoader implements IModuleLoader {
     @Override
     // calls the onDisable method of all the running modules
     public void disableAllModules() {
+        Core.loggerInstance.logMessage("Disabling all modules and saving configs..");
         for(IModuleHandle handle : handles) {
             handle.getModule().onDisable();
+            handle.getModule().getConfigManager().saveAll();
+            handle.getModule().getConfigManager().save();
             Core.loggerInstance.logMessage("Disabled module: " + handle.getDescription().getName());
         }
     }
@@ -170,8 +210,20 @@ public class ModuleLoader implements IModuleLoader {
                 error = true;
             }
         }
+        handles.clear();
         System.gc();
         Core.loggerInstance.logMessage("Unloading all modules " + (error ? "not successful" : "successfully") +"!");
+    }
+
+    @Override
+    public void unloadModule(IModuleHandle handle) {
+        try {
+            handle.getClassLoader().close();
+        } catch(IOException e) {
+            Core.loggerInstance.logError("An error occurred while unloading the module: " + handle.getDescription().getName());
+        }
+        handles.remove(handle);
+        System.gc();
     }
 
     private void setModuleVars(Module module, IModuleDescription description, IModuleHandle handle) {
