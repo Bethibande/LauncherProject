@@ -6,7 +6,7 @@ import lombok.Getter;
 import java.io.*;
 import java.util.HashMap;
 
-public class SimpleConfig implements ISimpleConfig {
+public class SimpleConfig implements ISimpleConfig, Serializable {
 
     // this implementation is only capable of saving and returning Strings
     HashMap<String, String> values = new HashMap<>();
@@ -15,6 +15,7 @@ public class SimpleConfig implements ISimpleConfig {
 
     @Override
     public void set(String key, Object value) {
+        if(values == null) values = new HashMap<>();
         values.remove(key);
         values.put(key, value.toString());
     }

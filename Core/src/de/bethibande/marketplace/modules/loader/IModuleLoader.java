@@ -1,7 +1,6 @@
-package de.bethibande.marketplace.moduleloader;
+package de.bethibande.marketplace.modules.loader;
 
 import java.io.File;
-import java.net.MalformedURLException;
 import java.util.List;
 
 public interface IModuleLoader {
@@ -10,6 +9,8 @@ public interface IModuleLoader {
     File moduleConfigPath = new File("configs/");
     // the path the modules are located at
     File modulesPath = new File("modules/");
+    // name of the file the module description will be loaded from
+    String moduleDescriptionFileName = "module.yml";
 
     // create modules and configs directory
     void initModuleDirectories();

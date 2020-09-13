@@ -1,0 +1,5 @@
+name: Test-module
+main: de.bethibande.test.Core
+author: Bethibande
+version: 1.0
+description: This is a test module!

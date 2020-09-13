@@ -1,15 +1,17 @@
-package de.bethibande.marketplace.modules;
+package de.bethibande.marketplace.modules.configs;
 
-import de.bethibande.marketplace.moduleloader.IModule;
+import de.bethibande.marketplace.modules.IModule;
 import de.bethibande.marketplace.utils.configs.GsonConfig;
 import lombok.Getter;
 
-public class GsonModuleConfig extends GsonConfig implements IModuleConfig {
+import java.io.Serializable;
+
+public class GsonModuleConfig extends GsonConfig implements IModuleConfig, Serializable {
 
     @Getter
-    private final IModuleConfigManager manager;
+    private transient final IModuleConfigManager manager;
     @Getter
-    private final IModule owner;
+    private transient final IModule owner;
     @Getter
     private final String name;
 

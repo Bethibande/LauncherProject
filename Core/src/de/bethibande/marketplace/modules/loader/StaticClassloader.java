@@ -1,4 +1,4 @@
-package de.bethibande.marketplace.moduleloader;
+package de.bethibande.marketplace.modules.loader;
 
 import java.net.URL;
 import java.net.URLClassLoader;

@@ -1,7 +1,8 @@
-package de.bethibande.marketplace.moduleloader;
+package de.bethibande.marketplace.modules;
 
-import de.bethibande.marketplace.modules.IModuleConfigManager;
+import de.bethibande.marketplace.modules.configs.IModuleConfigManager;
 import de.bethibande.marketplace.modules.IModuleManager;
+import de.bethibande.marketplace.modules.loader.IModuleHandle;
 
 public interface IModule {
 

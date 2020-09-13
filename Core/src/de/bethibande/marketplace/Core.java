@@ -51,6 +51,8 @@ public class Core {
         loggerInstance.logMessage("The module loader has finished and loaded all loadable modules!");
 
         loggerInstance.logMessage("Bootstrap finished!");
+
+        shutdown(0);
     }
 
     public static void shutdown(int exitCode) {

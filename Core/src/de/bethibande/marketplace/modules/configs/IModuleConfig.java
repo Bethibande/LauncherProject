@@ -1,6 +1,6 @@
-package de.bethibande.marketplace.modules;
+package de.bethibande.marketplace.modules.configs;
 
-import de.bethibande.marketplace.moduleloader.IModule;
+import de.bethibande.marketplace.modules.IModule;
 import de.bethibande.marketplace.utils.configs.ISimpleConfig;
 
 public interface IModuleConfig extends ISimpleConfig {

@@ -7,13 +7,14 @@ import de.bethibande.marketplace.Core;
 import java.io.*;
 import java.util.HashMap;
 
-public class GsonConfig implements ISimpleConfig {
+public class GsonConfig implements ISimpleConfig, Serializable {
 
     private HashMap<String, Object> values = new HashMap<>();
     private File configFile;
 
     @Override
     public void set(String key, Object value) {
+        if(values == null) values = new HashMap<>();
         values.remove(key);
         values.put(key, value);
     }

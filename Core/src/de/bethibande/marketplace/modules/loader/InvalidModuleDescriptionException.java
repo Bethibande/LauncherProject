@@ -1,4 +1,4 @@
-package de.bethibande.marketplace.moduleloader;
+package de.bethibande.marketplace.modules.loader;
 
 import lombok.NoArgsConstructor;
 

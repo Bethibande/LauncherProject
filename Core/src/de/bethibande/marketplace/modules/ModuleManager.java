@@ -1,6 +1,8 @@
 package de.bethibande.marketplace.modules;
 
-import de.bethibande.marketplace.moduleloader.*;
+import de.bethibande.marketplace.modules.loader.IModuleHandle;
+import de.bethibande.marketplace.modules.loader.IModuleLoader;
+import de.bethibande.marketplace.modules.loader.ModuleLoader;
 import lombok.Getter;
 
 import java.util.List;

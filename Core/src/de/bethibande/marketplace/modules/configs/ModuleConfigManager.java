@@ -1,23 +1,21 @@
-package de.bethibande.marketplace.modules;
+package de.bethibande.marketplace.modules.configs;
 
-import com.google.gson.Gson;
 import de.bethibande.marketplace.Core;
-import de.bethibande.marketplace.moduleloader.IModule;
+import de.bethibande.marketplace.modules.IModule;
+import de.bethibande.marketplace.utils.DataSerializer;
 import de.bethibande.marketplace.utils.FileUtils;
 import lombok.Getter;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.util.List;
 
-public class ModuleConfigManager implements IModuleConfigManager {
+public class ModuleConfigManager implements IModuleConfigManager, Serializable {
 
     @Getter
     private transient final IModule owner;
     @Getter
-    private List<IModuleConfig> configs;
+    // TODO: change so this is only cache and configs are only loaded from file when getConfigByName is called
+    private final List<IModuleConfig> configs;
 
     public ModuleConfigManager(IModule owner, List<IModuleConfig> configs) {
         this.owner = owner;
@@ -68,12 +66,13 @@ public class ModuleConfigManager implements IModuleConfigManager {
 
     @Override
     public void save() {
-        File saveFile = new File(owner.getHandle().getModuleConfigPath() + "/configs.json");
+        File saveFile = new File(owner.getHandle().getModuleConfigPath() + "/configs.ser");
         createModuleConfigPath();
+        FileUtils.createFile(saveFile);
         try {
             PrintWriter pw = new PrintWriter(new FileOutputStream(saveFile));
-            String json = new Gson().toJson(this);
-            pw.println(json);
+            String ser = DataSerializer.serialize(this);
+            pw.println(ser);
             pw.flush();
         } catch(IOException e) {
             e.printStackTrace();

@@ -1,4 +1,7 @@
-package de.bethibande.marketplace.moduleloader;
+package de.bethibande.marketplace.modules.loader;
+
+import de.bethibande.marketplace.modules.IModule;
+import de.bethibande.marketplace.modules.IModuleDescription;
 
 import java.io.File;
 

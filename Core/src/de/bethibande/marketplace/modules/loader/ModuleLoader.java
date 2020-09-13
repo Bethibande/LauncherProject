@@ -1,9 +1,13 @@
-package de.bethibande.marketplace.moduleloader;
+package de.bethibande.marketplace.modules.loader;
 
-import com.google.gson.Gson;
 import de.bethibande.marketplace.Core;
 import de.bethibande.marketplace.bootstrap.IService;
-import de.bethibande.marketplace.modules.ModuleConfigManager;
+import de.bethibande.marketplace.modules.IModule;
+import de.bethibande.marketplace.modules.IModuleDescription;
+import de.bethibande.marketplace.modules.Module;
+import de.bethibande.marketplace.modules.SimpleModuleDescription;
+import de.bethibande.marketplace.modules.configs.*;
+import de.bethibande.marketplace.utils.DataSerializer;
 import de.bethibande.marketplace.utils.FileUtils;
 import lombok.Getter;
 
@@ -20,8 +24,6 @@ import java.util.zip.ZipEntry;
 
 public class ModuleLoader implements IModuleLoader {
 
-    public static final String moduleDescriptionFileName = "module.yml";
-
     // found modules with corresponding description/config
     private final HashMap<File, SimpleModuleDescription> collectedModules = new HashMap<>();
 
@@ -34,12 +36,28 @@ public class ModuleLoader implements IModuleLoader {
     private static Field module_manager_field;
     private static Field module_configManager_field;
 
+    private static Field manager_module_field;
+
+    private static Field gson_config_module_field;
+    private static Field simple_config_module_field;
+    private static Field gson_config_manager_field;
+    private static Field simple_config_manager_field;
+
     static {
         try {
             module_description_field = Module.class.getDeclaredField("description");
             module_handle_field = Module.class.getDeclaredField("handle");
             module_manager_field = Module.class.getDeclaredField("manager");
             module_configManager_field = Module.class.getDeclaredField("configManager");
+
+            gson_config_manager_field = GsonModuleConfig.class.getDeclaredField("manager");
+            gson_config_module_field = GsonModuleConfig.class.getDeclaredField("owner");
+
+            simple_config_manager_field = SimpleModuleConfig.class.getDeclaredField("manager");
+            simple_config_module_field = SimpleModuleConfig.class.getDeclaredField("owner");
+
+            manager_module_field = ModuleConfigManager.class.getDeclaredField("owner");
+
         } catch(NoSuchFieldException e) {
             e.printStackTrace();
         }
@@ -82,7 +100,7 @@ public class ModuleLoader implements IModuleLoader {
                         SimpleModuleDescription description = getModuleDescriptionFromInputStream(in);
                         collectedModules.put(f, description);
                     } catch(InvalidModuleDescriptionException e) {
-                        Core.loggerInstance.logError("Invalid " + moduleDescriptionFileName + ": " + e.getMessage());
+                        Core.loggerInstance.logError("Invalid " + IModuleLoader.moduleDescriptionFileName + ": " + e.getMessage());
                     } catch(IOException e) { }
                 } else Core.loggerInstance.logMessage("Couldn't load jar: " + f + "!");
             }
@@ -109,7 +127,7 @@ public class ModuleLoader implements IModuleLoader {
         }
 
         if(name == null || mainClass == null) {
-            throw new InvalidModuleDescriptionException("Name and or main class not specified in " + moduleDescriptionFileName);
+            throw new InvalidModuleDescriptionException("Name and or main class not specified in " + IModuleLoader.moduleDescriptionFileName);
         }
         return new SimpleModuleDescription(name, version, author, mainClass, description);
     }
@@ -152,10 +170,10 @@ public class ModuleLoader implements IModuleLoader {
             if (!module.getHandle().getModuleConfigPath().exists()) {
                 manager = new ModuleConfigManager(module, new ArrayList<>());
             } else {
-                File managerFile = new File(module.getHandle().getModuleConfigPath() + "/configs.json");
+                File managerFile = new File(module.getHandle().getModuleConfigPath() + "/configs.ser");
                 if (managerFile.exists()) {
-                    String json = FileUtils.readFile(managerFile).get(0);
-                    manager = new Gson().fromJson(json, ModuleConfigManager.class);
+                    String ser = FileUtils.readFile(managerFile).get(0);
+                    manager = (ModuleConfigManager) DataSerializer.deserialize(ser);
                 } else manager = new ModuleConfigManager(module, new ArrayList<>());
             }
         } catch(Exception e) {
@@ -165,16 +183,49 @@ public class ModuleLoader implements IModuleLoader {
         if (manager == null) {
             Core.loggerInstance.logError("Error while loading module: " + module.getName() + ", couldn't load the module config manager.");
             unloadModule(module.getHandle());
+            return;
+        }
+        try {
+            for (IModuleConfig config : manager.getConfigs()) {
+                overrideModuleConfigFields(config, manager, module);
+            }
+        } catch(Exception e) {
+            Core.loggerInstance.logError("Error while loading module: " + module.getName());
+            e.printStackTrace();
         }
 
         try {
             module_configManager_field.setAccessible(true);
             module_configManager_field.set(module, manager);
             module_configManager_field.setAccessible(false);
+
+            manager_module_field.setAccessible(true);
+            manager_module_field.set(manager, module);
+            manager_module_field.setAccessible(false);
         } catch(IllegalAccessException e) {
             e.printStackTrace();
         }
 
+    }
+
+    private void overrideModuleConfigFields(IModuleConfig config, IModuleConfigManager manager, IModule module) throws IllegalAccessException {
+        if(config instanceof SimpleModuleConfig) {
+            SimpleModuleConfig smc = (SimpleModuleConfig)config;
+            simple_config_module_field.setAccessible(true);
+            simple_config_manager_field.setAccessible(true);
+            simple_config_module_field.set(smc, module);
+            simple_config_manager_field.set(smc, manager);
+            simple_config_manager_field.setAccessible(false);
+            simple_config_module_field.setAccessible(false);
+        } else if(config instanceof GsonModuleConfig) {
+            GsonModuleConfig gmc = (GsonModuleConfig)config;
+            gson_config_module_field.setAccessible(true);
+            gson_config_manager_field.setAccessible(true);
+            gson_config_module_field.set(gmc, module);
+            gson_config_manager_field.set(gmc, manager);
+            gson_config_module_field.setAccessible(false);
+            gson_config_manager_field.setAccessible(false);
+        }
     }
 
     @Override
