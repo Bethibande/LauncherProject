@@ -21,6 +21,8 @@ public class Core {
     public static IService bootstrapInstance;
     public static IModuleManager moduleManager;
 
+    // test webhook https://discordapp.com/api/webhooks/754020886088122459/PqnlqNPG5Ti5EKAsWHOTaKYlXiiYA4fZQnSG-rvNOf5TyGnA-X59qtN-HqJjH1EngC2d
+
     public static void main(String[] args) {
         argumentParser = new ArgumentParser();
         argumentParser.parseArguments(args);

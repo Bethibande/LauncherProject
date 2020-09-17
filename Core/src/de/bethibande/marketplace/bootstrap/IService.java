@@ -9,6 +9,9 @@ public interface IService {
     int EXIT_REQUESTED_BY_USER = 0x000000;
     int EXIT_NO_SERVICE_SPECIFIED = 0xffffff;
 
+    // will be called if the service has been started as the Core.bootstrapInstance instance
     void bootstrap(IArgumentParser args);
+    // get the service name
+    String getName();
 
 }

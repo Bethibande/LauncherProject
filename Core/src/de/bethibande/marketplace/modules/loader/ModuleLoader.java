@@ -43,6 +43,8 @@ public class ModuleLoader implements IModuleLoader {
     private static Field gson_config_manager_field;
     private static Field simple_config_manager_field;
 
+    // TODO: fix crash which occurs when calling the module onEnable method gives an exception
+
     static {
         try {
             module_description_field = Module.class.getDeclaredField("description");
@@ -57,7 +59,6 @@ public class ModuleLoader implements IModuleLoader {
             simple_config_module_field = SimpleModuleConfig.class.getDeclaredField("owner");
 
             manager_module_field = ModuleConfigManager.class.getDeclaredField("owner");
-
         } catch(NoSuchFieldException e) {
             e.printStackTrace();
         }
@@ -98,7 +99,13 @@ public class ModuleLoader implements IModuleLoader {
                     InputStream in = jar.getInputStream(entry);
                     try {
                         SimpleModuleDescription description = getModuleDescriptionFromInputStream(in);
-                        collectedModules.put(f, description);
+                        if(description.getMainService() == null) {
+                            collectedModules.put(f, description);
+                        } else
+                        System.out.println(Core.bootstrapInstance.getName() + " " + description.getMainService());
+                        if(Core.bootstrapInstance.getName().equalsIgnoreCase(description.getMainService())) {
+                            collectedModules.put(f, description);
+                        }
                     } catch(InvalidModuleDescriptionException e) {
                         Core.loggerInstance.logError("Invalid " + IModuleLoader.moduleDescriptionFileName + ": " + e.getMessage());
                     } catch(IOException e) { }
@@ -110,7 +117,7 @@ public class ModuleLoader implements IModuleLoader {
     }
 
     private static SimpleModuleDescription getModuleDescriptionFromInputStream(InputStream in) throws IOException {
-        String name = null, version = null, author = null, mainClass = null, description = null;
+        String name = null, version = null, author = null, mainClass = null, description = null, service = null;
 
         BufferedReader reader = new BufferedReader(new InputStreamReader(in));
         String buffer;
@@ -124,12 +131,13 @@ public class ModuleLoader implements IModuleLoader {
             if(key.equalsIgnoreCase("main")) mainClass = value;
             if(key.equalsIgnoreCase("author")) author = value;
             if(key.equalsIgnoreCase("description")) description = value;
+            if(key.equalsIgnoreCase("service")) service = value;
         }
 
         if(name == null || mainClass == null) {
             throw new InvalidModuleDescriptionException("Name and or main class not specified in " + IModuleLoader.moduleDescriptionFileName);
         }
-        return new SimpleModuleDescription(name, version, author, mainClass, description);
+        return new SimpleModuleDescription(name, version, author, mainClass, description, service);
     }
 
     @Override

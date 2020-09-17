@@ -16,6 +16,8 @@ public class SimpleModuleDescription implements IModuleDescription {
     private final String mainClass;
     @Getter
     private final String description;
+    @Getter
+    private final String mainService;
 
 
 }

@@ -9,4 +9,6 @@ public class ClientBootstrap implements IService {
 
     }
 
+    public String getName() { return "client"; }
+
 }

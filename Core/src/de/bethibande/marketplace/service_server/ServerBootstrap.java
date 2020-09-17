@@ -9,4 +9,6 @@ public class ServerBootstrap implements IService {
 
     }
 
+    public String getName() { return "server"; }
+
 }

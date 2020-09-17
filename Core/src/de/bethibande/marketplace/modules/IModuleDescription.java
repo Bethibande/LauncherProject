@@ -14,5 +14,7 @@ public interface IModuleDescription {
     String getAuthor();
     // the module description *
     String getDescription();
+    // get the service name * (the module will only be enabled if the service name of the Core.bootstrapInstance instance matches this value)
+    String getMainService();
 
 }

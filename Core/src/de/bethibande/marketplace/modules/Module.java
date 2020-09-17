@@ -1,8 +1,10 @@
 package de.bethibande.marketplace.modules;
 
+import de.bethibande.marketplace.bootstrap.IArgumentParser;
 import de.bethibande.marketplace.modules.configs.IModuleConfigManager;
 import de.bethibande.marketplace.modules.loader.IModuleHandle;
 import lombok.Getter;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 public class Module implements IModule {
 
@@ -16,11 +18,16 @@ public class Module implements IModule {
     private IModuleConfigManager configManager;
 
     public void onEnable() {
-        // TODO: Override in Module main class to execute code when the module was loaded
+        throw new NotImplementedException();
     }
 
     public void onDisable() {
-        // TODO: Override in Module main class to execute code when the service is stopping
+        throw new NotImplementedException();
+    }
+
+    @Override
+    public void bootstrap(IArgumentParser args) {
+        throw new NotImplementedException();
     }
 
     public String getName() { return this.description.getName(); }
