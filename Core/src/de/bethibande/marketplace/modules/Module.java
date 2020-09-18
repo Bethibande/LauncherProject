@@ -18,11 +18,11 @@ public class Module implements IModule {
     private IModuleConfigManager configManager;
 
     public void onEnable() {
-        throw new NotImplementedException();
+        //throw new NotImplementedException();
     }
 
     public void onDisable() {
-        throw new NotImplementedException();
+        //throw new NotImplementedException();
     }
 
     @Override

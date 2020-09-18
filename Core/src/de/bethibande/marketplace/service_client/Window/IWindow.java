@@ -1,6 +1,6 @@
 package de.bethibande.marketplace.service_client.Window;
 
-import de.bethibande.marketplace.bootstrap.IService;
+import de.bethibande.marketplace.utils.Dimension;
 
 // a window container based on the basic java jframe
 public interface IWindow {
@@ -11,8 +11,16 @@ public interface IWindow {
     void hide();
     // set the window size in percent (based on the screen size, ranging from 100.0f - 0.0f)
     void setSize(float width, float height);
-    // add a component to the window
-    void add(IWindowComponent component);
+    // get the window size in percent (based on the screen size, ranging from 100.0f - 0.0f)
+    Dimension getSize();
+    // set the window title
+    void setTitle(String title);
+    // get the current window title
+    String getTitle();
+    // set the root component
+    void show(IWindowRootComponent component);
+    // get the root component of the window
+    IWindowRootComponent getRootComponent();
     // get the window handle
     IWindowHandle getHandle();
 

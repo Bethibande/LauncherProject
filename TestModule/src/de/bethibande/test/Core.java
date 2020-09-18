@@ -19,8 +19,8 @@ public class Core extends Module {
 
         GsonModuleConfig gmc = (GsonModuleConfig)getConfigManager().getConfigByName("test-config");
         SimpleModuleConfig smc = (SimpleModuleConfig)getConfigManager().getConfigByName("test-config2");
-        //gmc.set("test", "abc2");
-        //smc.set("test", "abc");
+        gmc.set("test", "abc2");
+        smc.set("test", "abc");
         //getConfigManager().saveAll();
 
         System.out.println(smc.get("test") + " " + gmc.get("test"));

@@ -10,9 +10,11 @@ public interface IWindowHandle {
     IWindowManager getManager();
     // get the service which created the IWindow instance
     IService getService();
+    // get the renderer which is rendering the IWindow of this handle
+    IWindowRenderer getRenderer();
     // set the window fps cap of the IWindow instance
     void setFPS(int fps);
     // get the current fps cap of the IWindow instance
-    void getFPS();
+    int getFPS();
 
 }
