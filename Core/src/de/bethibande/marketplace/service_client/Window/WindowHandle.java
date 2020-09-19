@@ -15,9 +15,11 @@ public class WindowHandle implements IWindowHandle {
     @Getter
     private final IService service;
     @Getter
-    private final IWindowRenderer renderer;
+    private final IWindowUpdater renderer;
     @Getter
     @Setter
     private int FPS;
+
+    public boolean isCloseRequested() { return this.window.isCloseRequested(); }
 
 }

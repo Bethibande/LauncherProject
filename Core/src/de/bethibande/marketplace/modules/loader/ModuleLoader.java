@@ -36,14 +36,12 @@ public class ModuleLoader implements IModuleLoader {
     private static Field module_manager_field;
     private static Field module_configManager_field;
 
-    private static Field manager_module_field;
+    /*private static Field manager_module_field;
 
     private static Field gson_config_module_field;
     private static Field simple_config_module_field;
     private static Field gson_config_manager_field;
-    private static Field simple_config_manager_field;
-
-    // TODO: fix crash which occurs when calling the module onEnable method gives an exception
+    private static Field simple_config_manager_field;*/
 
     static {
         try {
@@ -52,13 +50,13 @@ public class ModuleLoader implements IModuleLoader {
             module_manager_field = Module.class.getDeclaredField("manager");
             module_configManager_field = Module.class.getDeclaredField("configManager");
 
-            gson_config_manager_field = GsonModuleConfig.class.getDeclaredField("manager");
+            /*gson_config_manager_field = GsonModuleConfig.class.getDeclaredField("manager");
             gson_config_module_field = GsonModuleConfig.class.getDeclaredField("owner");
 
             simple_config_manager_field = SimpleModuleConfig.class.getDeclaredField("manager");
             simple_config_module_field = SimpleModuleConfig.class.getDeclaredField("owner");
 
-            manager_module_field = ModuleConfigManager.class.getDeclaredField("owner");
+            manager_module_field = ModuleConfigManager.class.getDeclaredField("owner");*/
         } catch(NoSuchFieldException e) {
             e.printStackTrace();
         }
@@ -181,7 +179,8 @@ public class ModuleLoader implements IModuleLoader {
                 File managerFile = new File(module.getHandle().getModuleConfigPath() + "/configs.ser");
                 if (managerFile.exists()) {
                     String ser = FileUtils.readFile(managerFile).get(0);
-                    manager = (ModuleConfigManager) DataSerializer.deserialize(ser);
+                    ArrayList<IConfigReference> references = (ArrayList<IConfigReference>)DataSerializer.deserialize(ser);
+                    manager = new ModuleConfigManager(module, references);
                 } else manager = new ModuleConfigManager(module, new ArrayList<>());
             }
         } catch(Exception e) {
@@ -193,30 +192,30 @@ public class ModuleLoader implements IModuleLoader {
             unloadModule(module.getHandle());
             return;
         }
-        try {
+        /*try {
             for (IModuleConfig config : manager.getConfigs()) {
                 overrideModuleConfigFields(config, manager, module);
             }
         } catch(Exception e) {
             Core.loggerInstance.logError("Error while loading module: " + module.getName());
             e.printStackTrace();
-        }
+        }*/
 
         try {
             module_configManager_field.setAccessible(true);
             module_configManager_field.set(module, manager);
             module_configManager_field.setAccessible(false);
 
-            manager_module_field.setAccessible(true);
+            /*manager_module_field.setAccessible(true);
             manager_module_field.set(manager, module);
-            manager_module_field.setAccessible(false);
+            manager_module_field.setAccessible(false);*/
         } catch(IllegalAccessException e) {
             e.printStackTrace();
         }
 
     }
 
-    private void overrideModuleConfigFields(IModuleConfig config, IModuleConfigManager manager, IModule module) throws IllegalAccessException {
+    /*private void overrideModuleConfigFields(IModuleConfig config, IModuleConfigManager manager, IModule module) throws IllegalAccessException {
         if(config instanceof SimpleModuleConfig) {
             SimpleModuleConfig smc = (SimpleModuleConfig)config;
             simple_config_module_field.setAccessible(true);
@@ -234,14 +233,19 @@ public class ModuleLoader implements IModuleLoader {
             gson_config_module_field.setAccessible(false);
             gson_config_manager_field.setAccessible(false);
         }
-    }
+    }*/
 
     @Override
     // calls the onEnable method of all the injected modules
     public void enableAllModules() {
         for(IModuleHandle handle : handles) {
-            handle.getModule().onEnable();
-            Core.loggerInstance.logMessage("Enabled module: " + handle.getDescription().getName());
+            try {
+                handle.getModule().onEnable();
+                Core.loggerInstance.logMessage("Enabled module: " + handle.getDescription().getName());
+            } catch(Exception e) {
+                Core.loggerInstance.logError("Error while enabling module: " + handle.getDescription().getName());
+                e.printStackTrace();
+            }
         }
     }
 

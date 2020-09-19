@@ -2,9 +2,13 @@ package de.bethibande.marketplace.service_client.Window;
 
 import de.bethibande.marketplace.utils.Dimension;
 
+import javax.swing.*;
+
 // a window container based on the basic java jframe
 public interface IWindow {
 
+    // init window instance, hand over handle and name
+    void init(IWindowHandle handle, String name);
     // set the jframe visible
     void show();
     // set the jframe invisible
@@ -18,10 +22,23 @@ public interface IWindow {
     // get the current window title
     String getTitle();
     // set the root component
-    void show(IWindowRootComponent component);
+    void show(JPanel root);
     // get the root component of the window
-    IWindowRootComponent getRootComponent();
+    JPanel getRootComponent();
     // get the window handle
     IWindowHandle getHandle();
+    // is close requested by user
+    boolean isCloseRequested();
+    // close the window
+    void close();
+    // updat the jframe
+    void update();
+    // get the window name
+    String getName();
+
+    // called when the window/jframe has been registered at the IWindowManager
+    void initialize();
+    // called when the window/jframe size was changed to update the size of the jcomponents of the jframe
+    void updated();
 
 }

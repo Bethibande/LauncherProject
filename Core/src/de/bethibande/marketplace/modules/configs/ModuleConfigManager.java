@@ -7,6 +7,7 @@ import de.bethibande.marketplace.utils.FileUtils;
 import lombok.Getter;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.List;
 
 public class ModuleConfigManager implements IModuleConfigManager, Serializable {
@@ -14,12 +15,13 @@ public class ModuleConfigManager implements IModuleConfigManager, Serializable {
     @Getter
     private transient final IModule owner;
     @Getter
-    // TODO: change so this is only cache and configs are only loaded from file when getConfigByName is called
-    private final List<IModuleConfig> configs;
+    private final List<IModuleConfig> cachedConfigs = new ArrayList<>();
+    @Getter
+    private final List<IConfigReference> configs;
 
-    public ModuleConfigManager(IModule owner, List<IModuleConfig> configs) {
+    public ModuleConfigManager(IModule owner, List<IConfigReference> references) {
         this.owner = owner;
-        this.configs = configs;
+        this.configs = references;
     }
 
     @Override
@@ -30,7 +32,11 @@ public class ModuleConfigManager implements IModuleConfigManager, Serializable {
             File configFile = new File(owner.getHandle().getModuleConfigPath() + "/" + name + ".yml");
             FileUtils.createFile(configFile);
             smc.load(configFile);
-            configs.add(smc);
+            cachedConfigs.add(smc);
+
+            ConfigReference cr = new ConfigReference(configFile, name, ConfigType.SIMPLE_CONFIG);
+            configs.add(cr);
+
             return smc;
         } else return null;
     }
@@ -43,17 +49,44 @@ public class ModuleConfigManager implements IModuleConfigManager, Serializable {
             File configFile = new File(owner.getHandle().getModuleConfigPath() + "/" + name + ".yml");
             FileUtils.createFile(configFile);
             gmc.load(configFile);
-            configs.add(gmc);
+            cachedConfigs.add(gmc);
+
+            ConfigReference cr = new ConfigReference(configFile, name, ConfigType.GSON_CONFIG);
+            configs.add(cr);
+
             return gmc;
         } else return null;
     }
 
     @Override
     public boolean configExists(String name) {
-        for(IModuleConfig config : configs) {
+        for(IConfigReference config : configs) {
+            if(config.getConfigName().equalsIgnoreCase(name)) return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean isConfigInCache(String name) {
+        for(IModuleConfig config : cachedConfigs) {
             if(config.getName().equalsIgnoreCase(name)) return true;
         }
         return false;
+    }
+
+    @Override
+    public void loadConfigToCache(IConfigReference reference) {
+        if(reference.getType() == ConfigType.GSON_CONFIG) {
+            GsonModuleConfig gmc = new GsonModuleConfig(reference.getConfigName(), this, getOwner());
+            gmc.load(reference.getConfigReference());
+            cachedConfigs.add(gmc);
+        }
+        if(reference.getType() == ConfigType.SIMPLE_CONFIG) {
+            SimpleModuleConfig smc = new SimpleModuleConfig(reference.getConfigName(), this, getOwner());
+            smc.load(reference.getConfigReference());
+            cachedConfigs.add(smc);
+        }
+        System.out.println("loaded config to cache: " + reference.getConfigReference());
     }
 
     private void createModuleConfigPath() {
@@ -65,13 +98,21 @@ public class ModuleConfigManager implements IModuleConfigManager, Serializable {
     }
 
     @Override
+    public IConfigReference getReferenceByName(String name) {
+        for(IConfigReference ref : configs) {
+            if(ref.getConfigName().equalsIgnoreCase(name)) return ref;
+        }
+        return null;
+    }
+
+    @Override
     public void save() {
         File saveFile = new File(owner.getHandle().getModuleConfigPath() + "/configs.ser");
         createModuleConfigPath();
         FileUtils.createFile(saveFile);
         try {
             PrintWriter pw = new PrintWriter(new FileOutputStream(saveFile));
-            String ser = DataSerializer.serialize(this);
+            String ser = DataSerializer.serialize(this.configs);
             pw.println(ser);
             pw.flush();
         } catch(IOException e) {
@@ -80,9 +121,28 @@ public class ModuleConfigManager implements IModuleConfigManager, Serializable {
     }
 
     @Override
+    public void saveConfigAndRemoveFromCache(IModuleConfig config) {
+        config.save();
+        this.cachedConfigs.remove(config);
+    }
+
+    @Override
+    public void removeConfigFromCache(IModuleConfig config) {
+        this.cachedConfigs.remove(config);
+    }
+
+    @Override
     public IModuleConfig getConfigByName(String name) {
-        for(IModuleConfig config : configs) {
-            if(config.getName().equalsIgnoreCase(name)) return config;
+        if(isConfigInCache(name)) {
+            for(IModuleConfig config : cachedConfigs) {
+                if(config.getName().equalsIgnoreCase(name)) return config;
+            }
+            return null;
+        } else {
+            if(configExists(name)) {
+                loadConfigToCache(getReferenceByName(name));
+                return getConfigByName(name);
+            }
         }
         return null;
     }
@@ -95,14 +155,15 @@ public class ModuleConfigManager implements IModuleConfigManager, Serializable {
             if(!cfgFile.delete()) {
                 Core.loggerInstance.logError("Couldn't delete config file: " + cfgFile);
             } else {
-                configs.remove(cfg);
+                removeConfigFromCache(cfg);
+                configs.remove(getReferenceByName(name));
             }
         } else Core.loggerInstance.logError("Couldn't delete config because it couldn't be found: " + name);
     }
 
     @Override
     public void saveAll() {
-        for(IModuleConfig cfg : configs) {
+        for(IModuleConfig cfg : this.cachedConfigs) {
             cfg.save();
         }
     }
