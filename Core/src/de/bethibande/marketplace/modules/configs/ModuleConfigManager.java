@@ -4,6 +4,7 @@ import de.bethibande.marketplace.Core;
 import de.bethibande.marketplace.modules.IModule;
 import de.bethibande.marketplace.utils.DataSerializer;
 import de.bethibande.marketplace.utils.FileUtils;
+import de.bethibande.marketplace.utils.configs.ISimpleConfig;
 import lombok.Getter;
 
 import java.io.*;
@@ -75,18 +76,24 @@ public class ModuleConfigManager implements IModuleConfigManager, Serializable {
     }
 
     @Override
-    public void loadConfigToCache(IConfigReference reference) {
+    public IModuleConfig loadConfigToCache(IConfigReference reference) {
+        if(!reference.getConfigReference().exists()) {
+            Core.loggerInstance.logMessage("Couldn't cache config, due to a not existing config file: " + reference.getConfigName());
+            return null;
+        }
         if(reference.getType() == ConfigType.GSON_CONFIG) {
             GsonModuleConfig gmc = new GsonModuleConfig(reference.getConfigName(), this, getOwner());
             gmc.load(reference.getConfigReference());
             cachedConfigs.add(gmc);
+            return gmc;
         }
         if(reference.getType() == ConfigType.SIMPLE_CONFIG) {
             SimpleModuleConfig smc = new SimpleModuleConfig(reference.getConfigName(), this, getOwner());
             smc.load(reference.getConfigReference());
             cachedConfigs.add(smc);
+            return smc;
         }
-        System.out.println("loaded config to cache: " + reference.getConfigReference());
+        return null;
     }
 
     private void createModuleConfigPath() {
@@ -140,8 +147,7 @@ public class ModuleConfigManager implements IModuleConfigManager, Serializable {
             return null;
         } else {
             if(configExists(name)) {
-                loadConfigToCache(getReferenceByName(name));
-                return getConfigByName(name);
+                return loadConfigToCache(getReferenceByName(name));
             }
         }
         return null;

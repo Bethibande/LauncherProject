@@ -25,7 +25,7 @@ public interface IModuleConfigManager {
     // checks if the config is cached
     boolean isConfigInCache(String name);
     // loads a config from its file to the cache
-    void loadConfigToCache(IConfigReference reference);
+    IModuleConfig loadConfigToCache(IConfigReference reference);
     // get config by name, from cache if not loaded in cache it will automatically be loaded to the cache
     IModuleConfig getConfigByName(String name);
     // get config reference from name
