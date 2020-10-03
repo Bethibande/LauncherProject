@@ -1,13 +1,18 @@
 package de.bethibande.launcher.service_client.Window;
 
 import de.bethibande.launcher.utils.Dimension;
+import de.bethibande.launcher.utils.Vector2f;
 import de.bethibande.launcher.utils.WindowUtility;
 import lombok.Getter;
 
 import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
+// register window before setting the size/title and so on
 public class Window implements IWindow {
 
     private JFrame jframe;
@@ -30,6 +35,12 @@ public class Window implements IWindow {
             @Override
             public void windowClosing(WindowEvent e) {
                 closeRequested = true;
+            }
+        });
+        jframe.addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                updated();
             }
         });
         this.handle = handle;
@@ -55,6 +66,17 @@ public class Window implements IWindow {
     @Override
     public Dimension getSize() {
         return this.currentWindowSize;
+    }
+
+    @Override
+    public void setPosition(float x, float y) {
+        this.jframe.setLocation(WindowUtility.getScreenPercentX(x), WindowUtility.getScreenPercentY(y));
+    }
+
+    @Override
+    public Vector2f getPosition() {
+        Point p = this.jframe.getLocation();
+        return new Vector2f(WindowUtility.getPixelsInScreenPercentX((int)p.getX()), WindowUtility.getPixelsInScreenPercentY((int)p.getY()));
     }
 
     @Override

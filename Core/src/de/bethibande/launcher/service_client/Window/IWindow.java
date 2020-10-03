@@ -1,10 +1,12 @@
 package de.bethibande.launcher.service_client.Window;
 
 import de.bethibande.launcher.utils.Dimension;
+import de.bethibande.launcher.utils.Vector2f;
 
 import javax.swing.*;
 
 // a window container based on the basic java jframe
+// register window before setting the size/title and so on
 public interface IWindow {
 
     // init window instance, hand over handle and name
@@ -17,6 +19,10 @@ public interface IWindow {
     void setSize(float width, float height);
     // get the window size in percent (based on the screen size, ranging from 100.0f - 0.0f)
     Dimension getSize();
+    // set window position on screen (based on the screen size, ranging from 100.0f - 0.0f)
+    void setPosition(float x, float y);
+    // get window position on screen (based on the screen size, ranging from 100.0f - 0.0f)
+    Vector2f getPosition();
     // set the window title
     void setTitle(String title);
     // get the current window title

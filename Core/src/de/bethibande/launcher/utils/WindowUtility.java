@@ -14,4 +14,14 @@ public class WindowUtility {
         return (int)(Toolkit.getDefaultToolkit().getScreenSize().getHeight()*(percent/100f));
     }
 
+    // returns pixels in percent of screen size (0.0f-100.0f)
+    public static float getPixelsInScreenPercentX(int x) {
+        return (float)((float)x/Toolkit.getDefaultToolkit().getScreenSize().getWidth());
+    }
+
+    // returns pixels in percent of screen size (0.0f-100.0f)
+    public static float getPixelsInScreenPercentY(int y) {
+        return (float)((float)y/Toolkit.getDefaultToolkit().getScreenSize().getHeight());
+    }
+
 }

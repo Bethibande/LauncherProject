@@ -16,10 +16,13 @@ public class WindowManager implements IWindowManager {
     public IWindowHandle registerWindow(IWindow window, String name, int fps, IService service) {
         WindowUpdater renderer = new WindowUpdater();
         WindowHandle handle = new WindowHandle(window, this, service, renderer, fps);
+        window.init(handle, name);
+        window.setTitle(name);
         renderer.init(handle);
         renderer.start();
-        window.init(handle, name);
         this.windows.add(handle);
+
+        window.initialize();
 
         return handle;
     }
@@ -30,5 +33,13 @@ public class WindowManager implements IWindowManager {
         handle.getRenderer().close();
         this.windows.remove(handle);
         Core.loggerInstance.logMessage("Window destroyed: " + handle.getWindow().getName());
+    }
+
+    @Override
+    public IWindowHandle getWindowByName(String name) {
+        for(IWindowHandle handle : this.windows) {
+            if(handle.getWindow().getName().equalsIgnoreCase(name)) return handle;
+        }
+        return null;
     }
 }
