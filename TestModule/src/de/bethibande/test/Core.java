@@ -1,14 +1,14 @@
 package de.bethibande.test;
 
-import de.bethibande.marketplace.modules.Module;
-import de.bethibande.marketplace.modules.configs.GsonModuleConfig;
-import de.bethibande.marketplace.modules.configs.SimpleModuleConfig;
+import de.bethibande.launcher.modules.Module;
+import de.bethibande.launcher.modules.configs.GsonModuleConfig;
+import de.bethibande.launcher.modules.configs.SimpleModuleConfig;
 
 public class Core extends Module {
 
     @Override
     public void onEnable() {
-        de.bethibande.marketplace.Core.loggerInstance.logMessage("Test module has been enabled!!!");
+        de.bethibande.launcher.Core.loggerInstance.logMessage("Test module has been enabled!!!");
 
         if(!getConfigManager().configExists("test-config")) {
             getConfigManager().createGsonConfig("test-config");
