@@ -16,7 +16,6 @@ import java.awt.event.WindowEvent;
 public class Window implements IWindow {
 
     private JFrame jframe;
-    private Dimension currentWindowSize;
 
     @Getter
     private IWindowHandle handle;
@@ -60,12 +59,12 @@ public class Window implements IWindow {
     @Override
     public void setSize(float width, float height) {
         this.jframe.setSize(WindowUtility.getScreenPercentX(width), WindowUtility.getScreenPercentY(height));
-        this.currentWindowSize = new Dimension(width, height);
     }
 
     @Override
     public Dimension getSize() {
-        return this.currentWindowSize;
+        java.awt.Dimension size = this.jframe.getSize();
+        return new Dimension(WindowUtility.getPixelsInScreenPercentX((int)size.getWidth()), WindowUtility.getPixelsInScreenPercentY((int)size.getHeight()));
     }
 
     @Override
