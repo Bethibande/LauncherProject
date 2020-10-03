@@ -100,7 +100,6 @@ public class ModuleLoader implements IModuleLoader {
                         if(description.getMainService() == null) {
                             collectedModules.put(f, description);
                         } else
-                        System.out.println(Core.bootstrapInstance.getName() + " " + description.getMainService());
                         if(Core.bootstrapInstance.getName().equalsIgnoreCase(description.getMainService())) {
                             collectedModules.put(f, description);
                         }
