@@ -116,6 +116,7 @@ public class ModuleLoader implements IModuleLoader {
 
     private static SimpleModuleDescription getModuleDescriptionFromInputStream(InputStream in) throws IOException {
         String name = null, version = null, author = null, mainClass = null, description = null, service = null;
+        HashMap<String, String> customValues = new HashMap<>();
 
         BufferedReader reader = new BufferedReader(new InputStreamReader(in));
         String buffer;
@@ -124,18 +125,32 @@ public class ModuleLoader implements IModuleLoader {
             String key = buffer.split(":")[0];
             String value = buffer.split(":")[1];
 
-            if(key.equalsIgnoreCase("name")) name = value;
-            if(key.equalsIgnoreCase("version")) version = value;
-            if(key.equalsIgnoreCase("main")) mainClass = value;
-            if(key.equalsIgnoreCase("author")) author = value;
-            if(key.equalsIgnoreCase("description")) description = value;
-            if(key.equalsIgnoreCase("service")) service = value;
+            if(key.equalsIgnoreCase("name")) {
+                name = value;
+            } else
+            if(key.equalsIgnoreCase("version")) {
+                version = value;
+            } else
+            if(key.equalsIgnoreCase("main")) {
+                mainClass = value;
+            } else
+            if(key.equalsIgnoreCase("author")) {
+                author = value;
+            } else
+            if(key.equalsIgnoreCase("description")) {
+                description = value;
+            } else
+            if(key.equalsIgnoreCase("service")) {
+                service = value;
+            } else {
+                customValues.put(key, value);
+            }
         }
 
         if(name == null || mainClass == null) {
             throw new InvalidModuleDescriptionException("Name and or main class not specified in " + IModuleLoader.moduleDescriptionFileName);
         }
-        return new SimpleModuleDescription(name, version, author, mainClass, description, service);
+        return new SimpleModuleDescription(name, version, author, mainClass, description, service, customValues);
     }
 
     @Override

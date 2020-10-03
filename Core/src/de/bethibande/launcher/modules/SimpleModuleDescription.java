@@ -3,6 +3,8 @@ package de.bethibande.launcher.modules;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.util.HashMap;
+
 @AllArgsConstructor
 public class SimpleModuleDescription implements IModuleDescription {
 
@@ -18,6 +20,8 @@ public class SimpleModuleDescription implements IModuleDescription {
     private final String description;
     @Getter
     private final String mainService;
+    @Getter
+    private final HashMap<String, String> customValues;
 
 
 }

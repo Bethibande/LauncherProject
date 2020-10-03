@@ -1,5 +1,7 @@
 package de.bethibande.launcher.modules;
 
+import java.util.HashMap;
+
 public interface IModuleDescription {
 
     // * = optional
@@ -16,5 +18,7 @@ public interface IModuleDescription {
     String getDescription();
     // get the service name * (the module will only be enabled if the service name of the Core.bootstrapInstance instance matches this value)
     String getMainService();
+    // get custom values/values which are none standard values/keys
+    HashMap<String, String> getCustomValues();
 
 }
