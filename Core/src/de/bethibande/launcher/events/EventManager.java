@@ -5,8 +5,12 @@ import de.bethibande.launcher.bootstrap.IService;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.util.ArrayList;
+import java.util.List;
 
 public class EventManager {
+
+    private static final List<Class<? extends Event>> knownEvents = new ArrayList<>();
 
     public void registerListener(Listener l, IService service) {
         try {
@@ -27,7 +31,32 @@ public class EventManager {
         }
     }
 
+    public void unregisterListeners(Listener l, IService service) {
+        for(Class<? extends Event> event : knownEvents) {
+            try {
+                Event e = event.newInstance();
+                HandlerList handlers = e.getHandlers();
+                handlers.unregisterHandler(service, l);
+            } catch(Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+    }
+
+    public void unregisterListeners(IService service) {
+        for(Class<? extends Event> event : knownEvents) {
+            try {
+                Event e = event.newInstance();
+                HandlerList handlers = e.getHandlers();
+                handlers.unregisterHandlers(service);
+            } catch(Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+    }
+
     public void runEvent(Event e) {
+        if(!knownEvents.contains(e.getClass())) knownEvents.add(e.getClass());
         for(IService s : e.getHandlers().getHandlers().keySet()) {
             for(Handler l : e.getHandlers().getHandlers().get(s)) {
                 try {

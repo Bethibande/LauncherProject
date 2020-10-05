@@ -281,6 +281,7 @@ public class ModuleLoader implements IModuleLoader {
         boolean error = false;
         for(IModuleHandle handle : handles) {
             try {
+                Core.eventManager.unregisterListeners(handle.getModule());
                 handle.getClassLoader().close();
             } catch(IOException e) {
                 Core.loggerInstance.logError("An error occurred while unloading the module: " + handle.getDescription().getName());
@@ -293,8 +294,10 @@ public class ModuleLoader implements IModuleLoader {
     }
 
     @Override
+    // not recommended, restart instead of using this to reload modules
     public void unloadModule(IModuleHandle handle) {
         try {
+            Core.eventManager.unregisterListeners(handle.getModule());
             handle.getClassLoader().close();
         } catch(IOException e) {
             Core.loggerInstance.logError("An error occurred while unloading the module: " + handle.getDescription().getName());

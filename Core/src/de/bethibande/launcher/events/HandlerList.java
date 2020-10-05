@@ -28,7 +28,14 @@ public class HandlerList {
     }
 
     public void unregisterHandler(IService service, Listener l) {
-        handlers.get(service).remove(l);
+        List<Handler> remove = new ArrayList<>();
+        for(Handler handler : handlers.get(service)) {
+            if(handler.getListener() == l) {
+                remove.add(handler);
+            }
+        }
+        remove.forEach(handlers.get(service)::remove);
+
     }
 
 }
