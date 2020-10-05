@@ -2,6 +2,7 @@ package de.bethibande.launcher;
 
 import de.bethibande.launcher.bootstrap.ArgumentParser;
 import de.bethibande.launcher.bootstrap.IArgumentParser;
+import de.bethibande.launcher.events.EventManager;
 import de.bethibande.launcher.service_client.ClientBootstrap;
 import de.bethibande.launcher.bootstrap.IService;
 import de.bethibande.launcher.service_server.ServerBootstrap;
@@ -20,6 +21,8 @@ public class Core {
 
     public static IService bootstrapInstance;
     public static IModuleManager moduleManager;
+
+    public static EventManager eventManager;
 
     public static void main(String[] args) {
         argumentParser = new ArgumentParser();
@@ -42,6 +45,11 @@ public class Core {
         } else System.exit(IService.EXIT_NO_SERVICE_SPECIFIED);
 
         loggerInstance.logMessage("Service started!");
+
+        loggerInstance.logMessage("Initializing event manager");
+
+        eventManager = new EventManager();
+
         loggerInstance.logMessage("Starting module loader...");
 
         moduleManager = new ModuleManager();

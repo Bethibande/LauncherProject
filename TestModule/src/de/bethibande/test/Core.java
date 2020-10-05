@@ -1,5 +1,6 @@
 package de.bethibande.test;
 
+import de.bethibande.launcher.events.TestEvent;
 import de.bethibande.launcher.modules.Module;
 import de.bethibande.launcher.modules.configs.GsonModuleConfig;
 import de.bethibande.launcher.modules.configs.SimpleModuleConfig;
@@ -19,10 +20,12 @@ public class Core extends Module {
 
         GsonModuleConfig gmc = (GsonModuleConfig)getConfigManager().getConfigByName("test-config");
         SimpleModuleConfig smc = (SimpleModuleConfig)getConfigManager().getConfigByName("test-config2");
-        //gmc.set("test", "abc2");
-        //smc.set("test", "abc");
+        gmc.set("test", "abc2");
+        smc.set("test", "abc");
         //getConfigManager().saveAll();
 
+        de.bethibande.launcher.Core.eventManager.registerListener(new TestListener(), this);
+        de.bethibande.launcher.Core.eventManager.runEvent(new TestEvent());
         System.out.println(smc.get("test") + " " + gmc.get("test"));
 
     }
