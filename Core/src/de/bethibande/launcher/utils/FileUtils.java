@@ -6,6 +6,7 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
+@SuppressWarnings("unused")
 public class FileUtils {
 
     public static void createFile(File f) {
@@ -30,6 +31,19 @@ public class FileUtils {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public static void writeFile(File f, String[] content) {
+        try {
+            PrintWriter writer = new PrintWriter(new FileOutputStream(f));
+            for(String s : content) {
+                writer.println(s);
+            }
+            writer.flush();
+            writer.close();
+        } catch(IOException e) {
+            e.printStackTrace();
+        }
     }
 
 }

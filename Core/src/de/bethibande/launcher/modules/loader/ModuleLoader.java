@@ -268,6 +268,7 @@ public class ModuleLoader implements IModuleLoader {
     public void disableAllModules() {
         Core.loggerInstance.logMessage("Disabling all modules and saving configs..");
         for(IModuleHandle handle : handles) {
+            Core.eventManager.unregisterListeners(handle.getModule());
             handle.getModule().onDisable();
             handle.getModule().getConfigManager().saveAll();
             handle.getModule().getConfigManager().save();
