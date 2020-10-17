@@ -4,6 +4,10 @@ import java.util.Arrays;
 
 public class ArrayUtils {
 
+    public static byte[] trim(byte[] bytes, int i) {
+        return Arrays.copyOf(bytes, i );
+    }
+
     public static byte[] trim(byte[] bytes) {
         int i = bytes.length - 1;
         while (i >= 0 && bytes[i] == 0) {

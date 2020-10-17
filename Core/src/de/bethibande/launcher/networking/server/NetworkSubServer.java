@@ -96,7 +96,7 @@ public class NetworkSubServer extends Thread {
                         while(this.client.isConnected() && (read = in.read(buffer)) > 0) {
 
                             if(this.client_key != null && this.useEncryption) {
-                                buffer = ArrayUtils.trim(buffer);
+                                buffer = ArrayUtils.trim(buffer, read);
                                 buffer = this.rsa.decrypt(buffer);
                             }
 

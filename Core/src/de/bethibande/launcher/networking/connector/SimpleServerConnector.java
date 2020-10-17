@@ -131,9 +131,9 @@ public class SimpleServerConnector extends Thread implements ISimpleServerConnec
                         }
 
                         buffer = new byte[this.buffer_size];
-                        while(this.socket.isConnected() && !this.socket.isClosed() && in.read(buffer) >= 0) {
+                        while(this.socket.isConnected() && !this.socket.isClosed() && (read = in.read(buffer)) >= 0) {
                             if(this.encryptionEnabled) {
-                                buffer = ArrayUtils.trim(buffer);
+                                buffer = ArrayUtils.trim(buffer, read);
                                 buffer = this.rsa.decrypt(buffer);
                             }
                             if(buffer[0] == SimpleNetworkServer.ping_packet_byte) {
