@@ -26,7 +26,7 @@ public class RSA {
 
     public RSA(int key_size) {
         this.key_size = key_size;
-        Random r = new Random();
+        SecureRandom r = new SecureRandom();
         BigInteger p = BigInteger.probablePrime(key_size, r);
         BigInteger q = BigInteger.probablePrime(key_size, r);
         N = p.multiply(q);
