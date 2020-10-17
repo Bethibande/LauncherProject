@@ -5,6 +5,8 @@ import de.bethibande.launcher.networking.RestAction;
 import de.bethibande.launcher.networking.encryption.PublicKey;
 import de.bethibande.launcher.networking.encryption.RSA;
 import de.bethibande.launcher.networking.events.SubServerConnectedEvent;
+import de.bethibande.launcher.utils.ArrayUtils;
+import de.bethibande.launcher.utils.DataSerializer;
 import lombok.Getter;
 
 import java.io.IOException;
@@ -70,6 +72,20 @@ public class NetworkSubServer extends Thread {
                     if (protocol.startsWith("HTTP/1.1")) {
                         this.header = header;
 
+                        BigInteger e = null, N = null;
+                        for(String headerLine : header) {
+                            if(headerLine.startsWith("Public-Key-e: ")) {
+                                e = new BigInteger(headerLine.substring(14, headerLine.length()-1));
+                            }
+                            if(headerLine.startsWith("Public-Key-N: ")) {
+                                N = new BigInteger(headerLine.substring(14, headerLine.length()-1));
+                            }
+                        }
+
+                        if(this.useEncryption && e != null) {
+                            this.client_key = new PublicKey(e, N);
+                        }
+
                         sendStatusHeader(out, 200);
                         this.client.setSoTimeout(this.parent.getPingTimeOut()*2);
 
@@ -80,6 +96,7 @@ public class NetworkSubServer extends Thread {
                         while(this.client.isConnected() && (read = in.read(buffer)) > 0) {
 
                             if(this.client_key != null && this.useEncryption) {
+                                buffer = ArrayUtils.trim(buffer);
                                 buffer = this.rsa.decrypt(buffer);
                             }
 
@@ -87,7 +104,7 @@ public class NetworkSubServer extends Thread {
                             if(buffer[0] == SimpleNetworkServer.ping_packet_byte) {
                                 parent.getPinged().remove(this);
 
-                            } else if(buffer[0] == SimpleNetworkServer.rsa_public_key_byte) {
+                            }/* else if(buffer[0] == SimpleNetworkServer.rsa_public_key_byte) {
                                 ByteBuffer buf = ByteBuffer.allocate(buffer.length);
                                 buf.put(buffer);
                                 buf.flip();
@@ -104,7 +121,8 @@ public class NetworkSubServer extends Thread {
                                 e = new BigInteger(e_str);
                                 N = new BigInteger(N_str);
                                 this.client_key = new PublicKey(e, N);
-                            } else this.action.run(buffer);
+                            }*/ else this.action.run(buffer);
+
                             // clear the buffer
                             buffer = new byte[this.buffer_size];
                         }
@@ -179,7 +197,6 @@ public class NetworkSubServer extends Thread {
             if(this.useEncryption) {
                 byte[] encrypted = this.rsa.encrypt(buffer, this.client_key);
                 out.write(encrypted, 0, encrypted.length);
-                System.out.println("encrypted: " + new String(encrypted));
             } else out.write(buffer, 0, buffer.length);
             out.flush();
         } catch(IOException e) {

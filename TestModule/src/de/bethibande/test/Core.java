@@ -34,10 +34,11 @@ public class Core extends Module {
 
 
         int buffer_size = 1024*4;
-        SimpleNetworkServer sms = new SimpleNetworkServer(22222, buffer_size, false, 5000);
+        boolean encryption = true;
+        SimpleNetworkServer sms = new SimpleNetworkServer(22222, buffer_size, encryption, 5000);
         sms.start();
 
-        SimpleServerConnector ssc = new SimpleServerConnector("localhost", 22222, buffer_size);
+        SimpleServerConnector ssc = new SimpleServerConnector("localhost", 22222, buffer_size, encryption);
         ssc.payloadReceived(buffer -> {
             de.bethibande.launcher.Core.eventManager.runEvent(new ConnectorBufferReceivedEvent(buffer, ssc));
         });

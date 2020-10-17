@@ -6,6 +6,7 @@ import de.bethibande.launcher.networking.encryption.PublicKey;
 import de.bethibande.launcher.networking.encryption.RSA;
 import de.bethibande.launcher.networking.events.ConnectorConnectedEvent;
 import de.bethibande.launcher.networking.server.SimpleNetworkServer;
+import de.bethibande.launcher.utils.ArrayUtils;
 import de.bethibande.launcher.utils.TimeUtils;
 import lombok.Getter;
 
@@ -50,10 +51,13 @@ public class SimpleServerConnector extends Thread implements ISimpleServerConnec
 
     private final ByteBuffer pingBuffer = ByteBuffer.allocate(Long.BYTES+1);
 
-    public SimpleServerConnector(String host, int port, int buffer_size) {
+    private final boolean initEncryption;
+
+    public SimpleServerConnector(String host, int port, int buffer_size, boolean initializeEncryption) {
         this.hostIP = host;
         this.hostPort = port;
         this.buffer_size = buffer_size;
+        this.initEncryption = initializeEncryption;
     }
 
     @Override
@@ -69,6 +73,11 @@ public class SimpleServerConnector extends Thread implements ISimpleServerConnec
                 writer.println("Connect " + this.hostIP + ":" + this.hostPort + " HTTP/1.1");
                 writer.println("Connection: keep-alive");
                 writer.println("Date: " + new Date());
+                if(this.initEncryption) {
+                    this.rsa = new RSA(SimpleNetworkServer.rsa_key_size);
+                    writer.println("Public-Key-e: " + this.rsa.getPublicKey().getE());
+                    writer.println("Public-Key-N: " + this.rsa.getPublicKey().getN());
+                }
                 writer.println();
                 writer.flush();
 
@@ -101,10 +110,10 @@ public class SimpleServerConnector extends Thread implements ISimpleServerConnec
                         }
 
                         if(encryptionEnabled && e != null && N != null) {
-                            this.rsa = new RSA(SimpleNetworkServer.rsa_key_size);
+                            //this.rsa = new RSA(SimpleNetworkServer.rsa_key_size);
                             this.server_public_key = new PublicKey(e, N);
 
-                            byte[] e_buf = e.toString().getBytes();
+                            /*byte[] e_buf = e.toString().getBytes();
                             byte[] N_buf = N.toString().getBytes();
 
                             ByteBuffer key_packet = ByteBuffer.allocate((e_buf.length + N_buf.length + 1 + 2));
@@ -112,7 +121,7 @@ public class SimpleServerConnector extends Thread implements ISimpleServerConnec
                             key_packet.putShort((short)e_buf.length);
                             key_packet.put(e_buf);
                             key_packet.put(N_buf);
-                            sendBufferToServerUnEncrypted(key_packet.array());
+                            sendBufferToServerUnEncrypted(key_packet.array());*/
                         }
 
                         Core.eventManager.runEvent(new ConnectorConnectedEvent(this));
@@ -124,8 +133,8 @@ public class SimpleServerConnector extends Thread implements ISimpleServerConnec
                         buffer = new byte[this.buffer_size];
                         while(this.socket.isConnected() && !this.socket.isClosed() && in.read(buffer) >= 0) {
                             if(this.encryptionEnabled) {
+                                buffer = ArrayUtils.trim(buffer);
                                 buffer = this.rsa.decrypt(buffer);
-                                System.out.println("decrypted: " + new String(buffer));
                             }
                             if(buffer[0] == SimpleNetworkServer.ping_packet_byte) {
                                 pingBuffer.clear();
@@ -149,8 +158,8 @@ public class SimpleServerConnector extends Thread implements ISimpleServerConnec
 
             } else Core.loggerInstance.logError("An error occurred while executing connector/client task.");
         } catch(IOException e) {
-            Core.loggerInstance.logError("An error occurred while executing connector/client task.");
-            e.printStackTrace();
+            //Core.loggerInstance.logError("An error occurred while executing connector/client task.");
+            //e.printStackTrace();
         }
     }
 
