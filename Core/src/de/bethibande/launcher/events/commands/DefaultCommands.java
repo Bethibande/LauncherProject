@@ -7,7 +7,7 @@ import de.bethibande.launcher.events.Listener;
 
 import java.io.IOException;
 
-public class StopCommand implements Listener {
+public class DefaultCommands implements Listener {
 
     @EventHandler
     public void onConsoleInput(ConsoleInputEvent e) {
@@ -33,7 +33,7 @@ public class StopCommand implements Listener {
                         } catch(NumberFormatException ex) {
                             Core.loggerInstance.logMessage("Syntax error: stop (-h delay) | delay in seconds");
                         }
-                    }
+                    } else Core.loggerInstance.logMessage("Syntax error: stop (-h delay) | delay in seconds");
                 }
                 break;
         }

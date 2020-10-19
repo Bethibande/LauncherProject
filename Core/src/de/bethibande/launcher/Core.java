@@ -3,7 +3,8 @@ package de.bethibande.launcher;
 import de.bethibande.launcher.bootstrap.ArgumentParser;
 import de.bethibande.launcher.bootstrap.IArgumentParser;
 import de.bethibande.launcher.events.EventManager;
-import de.bethibande.launcher.events.commands.StopCommand;
+import de.bethibande.launcher.events.commands.DefaultCommands;
+import de.bethibande.launcher.events.listeners.ConsoleListener;
 import de.bethibande.launcher.service_client.ClientBootstrap;
 import de.bethibande.launcher.bootstrap.IService;
 import de.bethibande.launcher.service_server.ServerBootstrap;
@@ -59,7 +60,10 @@ public class Core {
 
         loggerInstance.logMessage("The module loader has finished and loaded all loadable modules!");
 
-        eventManager.registerListener(new StopCommand(), bootstrapInstance);
+        ConsoleListener listener_console = new ConsoleListener();
+        listener_console.start();
+        EventManager.staticEventListeners.add(listener_console);
+        eventManager.registerListener(new DefaultCommands(), bootstrapInstance);
 
         loggerInstance.logMessage("Initialized all default commands.");
 
