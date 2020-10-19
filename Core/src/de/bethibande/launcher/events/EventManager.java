@@ -12,6 +12,8 @@ public class EventManager {
 
     private static final List<Class<? extends Event>> knownEvents = new ArrayList<>();
 
+    public static final List<Thread> staticEventListeners = new ArrayList<>();
+
     public void registerListener(Listener l, IService service) {
         try {
             for(Method m : l.getClass().getDeclaredMethods()) {
