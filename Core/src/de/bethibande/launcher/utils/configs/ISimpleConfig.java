@@ -15,4 +15,7 @@ public interface ISimpleConfig {
     // returns null if no file has been loaded using load(File f);
     File getLoadedFile();
 
+    // checks if a key exists
+    boolean isSet(String key);
+
 }

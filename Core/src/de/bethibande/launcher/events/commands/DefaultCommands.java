@@ -5,15 +5,23 @@ import de.bethibande.launcher.events.ConsoleInputEvent;
 import de.bethibande.launcher.events.EventHandler;
 import de.bethibande.launcher.events.Listener;
 
-import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class DefaultCommands implements Listener {
+
+    public static final List<String> commands = new ArrayList<>();
+
+    static {
+        commands.add("stop (-h delay) | delay in seconds");
+        commands.add("help | show a list of available commands");
+    }
 
     @EventHandler
     public void onConsoleInput(ConsoleInputEvent e) {
         String cmd = e.getFullCommand();
         String[] args = e.getArgs();
-        switch (args[0]) {
+        switch (args[0].toLowerCase()) {
             case "stop":
                 if(args.length != 3) {
                     Core.shutdown(0);
@@ -35,6 +43,14 @@ public class DefaultCommands implements Listener {
                         }
                     } else Core.loggerInstance.logMessage("Syntax error: stop (-h delay) | delay in seconds");
                 }
+                break;
+            case "help":
+                Core.loggerInstance.logMessage("Help - Commands");
+                Core.loggerInstance.logMessage("");
+                for(String command : commands) {
+                    Core.loggerInstance.logMessage("  " + command);
+                }
+                Core.loggerInstance.logMessage("");
                 break;
         }
     }

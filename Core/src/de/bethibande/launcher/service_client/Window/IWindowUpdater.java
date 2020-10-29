@@ -1,5 +1,7 @@
 package de.bethibande.launcher.service_client.Window;
 
+import de.bethibande.launcher.service_client.Window.animations.IAnimator;
+
 public interface IWindowUpdater {
 
     // give the renderer the IWindowHandle of the IWindow it will be rendering
@@ -10,5 +12,7 @@ public interface IWindowUpdater {
     float getDeltaTime();
     // will cause the updater to close/stop/interrupt when it tries to update the window for the next time
     void close();
+
+    void startAnimator(IAnimator animator);
 
 }

@@ -4,6 +4,7 @@ import de.bethibande.launcher.utils.Dimension;
 import de.bethibande.launcher.utils.Vector2f;
 
 import javax.swing.*;
+import java.awt.*;
 
 // a window container based on the basic java jframe
 // register window before setting the size/title and so on
@@ -11,6 +12,8 @@ public interface IWindow {
 
     // init window instance, hand over handle and name
     void init(IWindowHandle handle, String name);
+    void init(IWindowHandle handle, String name, boolean undecorated);
+    void init(IWindowHandle handle, String name, Shape shape);
     // set the jframe visible
     void show();
     // set the jframe invisible
@@ -41,6 +44,15 @@ public interface IWindow {
     void update();
     // get the window name
     String getName();
+
+    // if true, the entire application will stop when this window has been closed
+    // !!! Only works if the user closes the application using the close button provided by the os
+    void setShutdownOnClose(boolean b);
+    // set the exit code, only used if setShutdownOnClose is true
+    void setShutdownCode(int exitCode);
+
+    boolean isShutdownOnClose();
+    int getShutdownCode();
 
     // called when the window/jframe has been registered at the IWindowManager
     void initialize();

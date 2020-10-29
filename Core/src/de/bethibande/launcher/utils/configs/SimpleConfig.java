@@ -22,6 +22,7 @@ public class SimpleConfig implements ISimpleConfig, Serializable {
 
     @Override
     public String get(String key) {
+        if(values == null) values = new HashMap<>();
         return values.get(key);
     }
 
@@ -57,6 +58,12 @@ public class SimpleConfig implements ISimpleConfig, Serializable {
             Core.loggerInstance.logError("Error while saving config.");
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public boolean isSet(String key) {
+        if(this.values == null) return false;
+        return values.containsKey(key);
     }
 
     @Override

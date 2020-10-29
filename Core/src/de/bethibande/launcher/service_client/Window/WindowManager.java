@@ -4,6 +4,7 @@ import de.bethibande.launcher.Core;
 import de.bethibande.launcher.bootstrap.IService;
 import lombok.Getter;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,7 +24,34 @@ public class WindowManager implements IWindowManager {
         this.windows.add(handle);
 
         window.initialize();
+        return handle;
+    }
 
+    @Override
+    public IWindowHandle registerWindow(IWindow window, String name, int fps, boolean undecorated, IService service) {
+        WindowUpdater renderer = new WindowUpdater();
+        WindowHandle handle = new WindowHandle(window, this, service, renderer, fps);
+        window.init(handle, name, undecorated);
+        window.setTitle(name);
+        renderer.init(handle);
+        renderer.start();
+        this.windows.add(handle);
+
+        window.initialize();
+        return handle;
+    }
+
+    @Override
+    public IWindowHandle registerWindow(IWindow window, String name, int fps, Shape shape, IService service) {
+        WindowUpdater renderer = new WindowUpdater();
+        WindowHandle handle = new WindowHandle(window, this, service, renderer, fps);
+        window.init(handle, name, shape);
+        window.setTitle(name);
+        renderer.init(handle);
+        renderer.start();
+        this.windows.add(handle);
+
+        window.initialize();
         return handle;
     }
 

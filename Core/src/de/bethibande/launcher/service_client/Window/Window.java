@@ -1,9 +1,11 @@
 package de.bethibande.launcher.service_client.Window;
 
+import de.bethibande.launcher.bootstrap.IService;
 import de.bethibande.launcher.utils.Dimension;
 import de.bethibande.launcher.utils.Vector2f;
 import de.bethibande.launcher.utils.WindowUtility;
 import lombok.Getter;
+import lombok.Setter;
 
 import javax.swing.*;
 import java.awt.*;
@@ -25,6 +27,12 @@ public class Window implements IWindow {
     private boolean closeRequested = false;
     @Getter
     private String name;
+    @Getter
+    @Setter
+    private boolean shutdownOnClose;
+    @Getter
+    @Setter
+    private int shutdownCode = IService.EXIT_REQUESTED_BY_USER;
 
     public void init(IWindowHandle handle, String name) {
         jframe = new JFrame();
@@ -45,6 +53,49 @@ public class Window implements IWindow {
         this.handle = handle;
         this.name = name;
     }
+
+    public void init(IWindowHandle handle, String name, boolean undecorated) {
+        jframe = new JFrame();
+        jframe.setUndecorated(undecorated);
+        jframe.setVisible(true);
+        jframe.setDefaultCloseOperation(0);
+        jframe.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                closeRequested = true;
+            }
+        });
+        jframe.addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                updated();
+            }
+        });
+        this.handle = handle;
+        this.name = name;
+    }
+    public void init(IWindowHandle handle, String name, Shape shape) {
+        jframe = new JFrame();
+        jframe.setUndecorated(true);
+        jframe.setShape(shape);
+        jframe.setVisible(true);
+        jframe.setDefaultCloseOperation(0);
+        jframe.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                closeRequested = true;
+            }
+        });
+        jframe.addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                updated();
+            }
+        });
+        this.handle = handle;
+        this.name = name;
+    }
+
 
     @Override
     public void show() {

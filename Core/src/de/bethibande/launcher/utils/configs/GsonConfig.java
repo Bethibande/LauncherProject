@@ -21,6 +21,7 @@ public class GsonConfig implements ISimpleConfig, Serializable {
 
     @Override
     public Object get(String key) {
+        if(values == null) values = new HashMap<>();
         return values.get(key);
     }
 
@@ -58,6 +59,12 @@ public class GsonConfig implements ISimpleConfig, Serializable {
             Core.loggerInstance.logError("Error while saving config.");
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public boolean isSet(String key) {
+        if(values == null) return false;
+        return values.containsKey(key);
     }
 
     @Override
