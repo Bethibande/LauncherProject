@@ -187,6 +187,15 @@ public class NetworkSubServer extends Thread {
         return this;
     }
 
+    public void closeConnection() {
+        try {
+            this.client.close();
+            this.parent.subServerClosed(this);
+        } catch(IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public boolean isConnected() {
         return (!this.client.isClosed() && this.client.isConnected());
     }

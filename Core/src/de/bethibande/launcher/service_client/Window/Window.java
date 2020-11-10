@@ -140,6 +140,24 @@ public class Window implements IWindow {
     }
 
     @Override
+    public void setIcon(Image image) {
+        this.jframe.setIconImage(image);
+    }
+
+    @Override
+    public boolean isVisible() {
+        return this.jframe.isVisible();
+    }
+
+    @Override
+    public void push() {
+        show();
+        this.jframe.toFront();
+        this.jframe.requestFocus();
+        this.jframe.revalidate();
+    }
+
+    @Override
     public void show(JPanel component) {
         if(this.rootComponent != null) this.jframe.remove(this.rootComponent);
         this.jframe.add(component);

@@ -72,6 +72,7 @@ public class WindowUpdater extends Thread implements IWindowUpdater {
     @Override
     public void startAnimator(IAnimator animator) {
         this.animators.add(animator);
+        animator.init(this);
     }
 
     @Override

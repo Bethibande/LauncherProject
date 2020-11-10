@@ -1,6 +1,6 @@
 package de.bethibande.launcher.service_client.Window.animations;
 
-public class AToBAnimator extends SimpleAnimator {
+public class LinearAnimator extends SimpleAnimator {
 
     private final float a;
     private final float b;
@@ -9,7 +9,7 @@ public class AToBAnimator extends SimpleAnimator {
 
     private float f;
 
-    public AToBAnimator(float a, float b, int time, IAnimationUpdate update) {
+    public LinearAnimator(float a, float b, int time, IAnimationUpdate update) {
         this.a = a;
         this.b = b;
         this.time = time;
@@ -24,17 +24,20 @@ public class AToBAnimator extends SimpleAnimator {
         if(a < b) {
             if(this.f >= b) {
                 this.f = b;
+                if(getFinish() != null) getFinish().run();
                 stop();
             }
         }
         if(a > b) {
             if(this.f <= b) {
                 this.f = b;
+                if(getFinish() != null) getFinish().run();
                 stop();
             }
         }
         if(a == b) {
             this.f = b;
+            if(getFinish() != null) getFinish().run();
             stop();
         }
         this.update.run(f);

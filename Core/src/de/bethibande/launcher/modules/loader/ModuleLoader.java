@@ -155,6 +155,16 @@ public class ModuleLoader implements IModuleLoader {
     @Override
     // inject all the collected and prepared modules
     public void injectCollectedModules() {
+        /*List<URL> urls = new ArrayList<>();
+        for(File moduleFile : collectedModules.keySet()) {
+            try {
+                urls.add(moduleFile.toURI().toURL());
+            } catch(MalformedURLException e) {
+                Core.loggerInstance.logMessage("Error while loading module: " + moduleFile.getAbsolutePath());
+                e.printStackTrace();
+            }
+        }
+        StaticClassloader classLoader = new StaticClassloader(urls.toArray(new URL[0]), ModuleLoader.class.getClassLoader());*/
         for(File moduleFile : collectedModules.keySet()) {
             try {
                 SimpleModuleDescription description = collectedModules.get(moduleFile);
@@ -171,7 +181,7 @@ public class ModuleLoader implements IModuleLoader {
                     Core.loggerInstance.logMessage("Injected module: " + description.getName());
                 }
             } catch(MalformedURLException e) {
-                Core.loggerInstance.logError("Error while loading module: " + moduleFile.getAbsolutePath());
+                Core.loggerInstance.logMessage("Error while loading module: " + moduleFile.getAbsolutePath());
                 e.printStackTrace();
             } catch(ClassNotFoundException e) {
                 Core.loggerInstance.logError("Error while loading module: " + moduleFile.getAbsolutePath() + " Main class not found");

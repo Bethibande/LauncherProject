@@ -30,8 +30,14 @@ public interface IWindow {
     void setTitle(String title);
     // get the current window title
     String getTitle();
+    // set the window icon
+    void setIcon(Image image);
     // set the root component
     void show(JPanel root);
+    // check if the window is visible
+    boolean isVisible();
+    // push window to the foreground and request focus
+    void push();
     // get the root component of the window
     JPanel getRootComponent();
     // get the window handle
