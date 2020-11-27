@@ -31,6 +31,8 @@ public class SimpleServerConnector extends Thread implements ISimpleServerConnec
 
     private final int buffer_size;
 
+    private final int timeout;
+
     @Getter
     private int statusCode = 0;
     @Getter
@@ -53,10 +55,11 @@ public class SimpleServerConnector extends Thread implements ISimpleServerConnec
 
     private final boolean initEncryption;
 
-    public SimpleServerConnector(String host, int port, int buffer_size, boolean initializeEncryption) {
+    public SimpleServerConnector(String host, int port, int buffer_size, int timeout, boolean initializeEncryption) {
         this.hostIP = host;
         this.hostPort = port;
         this.buffer_size = buffer_size;
+        this.timeout = timeout;
         this.initEncryption = initializeEncryption;
     }
 
@@ -64,6 +67,7 @@ public class SimpleServerConnector extends Thread implements ISimpleServerConnec
     public void run() {
         try {
             this.socket = new Socket(this.hostIP, this.hostPort);
+            this.socket.setSoTimeout(this.timeout*2);
             InputStream in = this.socket.getInputStream();
             OutputStream out = this.socket.getOutputStream();
             PrintWriter writer = new PrintWriter(out);
@@ -141,6 +145,7 @@ public class SimpleServerConnector extends Thread implements ISimpleServerConnec
                                 pingBuffer.put(SimpleNetworkServer.ping_packet_byte);
                                 pingBuffer.putLong(TimeUtils.getTimeInMillis());
                                 sendBufferToServer(pingBuffer.array());
+                                //System.out.println("ping");
                             } else this.action.run(buffer);
                             buffer = new byte[this.buffer_size];
                         }

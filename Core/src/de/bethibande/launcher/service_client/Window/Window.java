@@ -158,6 +158,16 @@ public class Window implements IWindow {
     }
 
     @Override
+    public void setResizable(boolean b) {
+        this.jframe.setResizable(b);
+    }
+
+    @Override
+    public boolean isResizable() {
+        return this.jframe.isResizable();
+    }
+
+    @Override
     public void show(JPanel component) {
         if(this.rootComponent != null) this.jframe.remove(this.rootComponent);
         this.jframe.add(component);

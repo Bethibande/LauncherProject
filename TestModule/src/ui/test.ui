@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- test -->
+<root xmlns:launcher="http://www.w3.org/2001/XMLSchema-instance" launcher:background="@color/colorPrimary">
+    <!-- only ideas not final yet! -->
+    <label
+    launcher:icon="@drawable/icons/Icon.png"
+    launcher:top="10dp"
+    launcher:left="10dp"
+    launcher:height="10dp"
+    launcher:width="80dp"/>
+</root>

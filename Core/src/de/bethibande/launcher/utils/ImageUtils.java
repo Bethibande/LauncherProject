@@ -1,7 +1,11 @@
 package de.bethibande.launcher.utils;
 
+import javax.imageio.ImageIO;
+import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 
 public class ImageUtils {
 
@@ -14,6 +18,15 @@ public class ImageUtils {
         g2.dispose();
 
         return resizedImg;
+    }
+
+    public static ImageIcon loadImage(File f) {
+        try {
+            return new ImageIcon(f.toURI().toURL());
+        } catch(IOException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
 }

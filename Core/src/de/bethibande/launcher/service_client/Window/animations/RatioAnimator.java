@@ -24,7 +24,7 @@ public class RatioAnimator extends SimpleAnimator {
         float r = this.ratio*deltaTime;
         float distance = Math.abs(this.f-this.to);
 
-        if(distance == 0 || distance <= 0.00125f) {
+        if(distance == 0 || distance <= 0.0125f) {
             stop();
             this.f = this.to;
             this.update.run(f);

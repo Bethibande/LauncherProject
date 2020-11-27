@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.util.HashMap;
+import java.util.List;
 
 @AllArgsConstructor
 public class SimpleModuleDescription implements IModuleDescription {
@@ -22,6 +23,8 @@ public class SimpleModuleDescription implements IModuleDescription {
     private final String mainService;
     @Getter
     private final HashMap<String, String> customValues;
+    @Getter
+    private final List<String> dependedModules;
 
 
 }

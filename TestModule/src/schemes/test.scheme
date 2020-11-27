@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- test -->
+<scheme>
+
+    <color name="colorPrimary">#2E323E</color>
+    <color name="colorPrimaryDark">#232730</color>
+    <color name="colorAccent">#388E3C</color>
+    <color name="colorText">#ffffff</color>
+
+    <color name="highLightA">#9c37b8</color>
+    <color name="highLightB">#1a37ad</color>
+
+</scheme>

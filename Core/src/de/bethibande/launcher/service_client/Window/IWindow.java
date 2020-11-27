@@ -38,6 +38,10 @@ public interface IWindow {
     boolean isVisible();
     // push window to the foreground and request focus
     void push();
+    // set window resizable
+    void setResizable(boolean b);
+    // get whether the window is resizable or not
+    boolean isResizable();
     // get the root component of the window
     JPanel getRootComponent();
     // get the window handle
@@ -46,7 +50,7 @@ public interface IWindow {
     boolean isCloseRequested();
     // close the window
     void close();
-    // updat the jframe
+    // update the jframe
     void update();
     // get the window name
     String getName();

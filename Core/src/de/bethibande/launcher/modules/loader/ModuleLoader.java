@@ -115,6 +115,7 @@ public class ModuleLoader implements IModuleLoader {
 
     private static SimpleModuleDescription getModuleDescriptionFromInputStream(InputStream in) throws IOException {
         String name = null, version = null, author = null, mainClass = null, description = null, service = null;
+        List<String> depend = new ArrayList<>();
         HashMap<String, String> customValues = new HashMap<>();
 
         BufferedReader reader = new BufferedReader(new InputStreamReader(in));
@@ -141,7 +142,10 @@ public class ModuleLoader implements IModuleLoader {
             } else
             if(key.equalsIgnoreCase("service")) {
                 service = value;
-            } else {
+            } else
+            if(key.equalsIgnoreCase("depend")) {
+                    depend.add(value);
+                } else {
                 customValues.put(key, value);
             }
         }
@@ -149,13 +153,13 @@ public class ModuleLoader implements IModuleLoader {
         if(name == null || mainClass == null) {
             throw new InvalidModuleDescriptionException("Name and or main class not specified in " + IModuleLoader.moduleDescriptionFileName);
         }
-        return new SimpleModuleDescription(name, version, author, mainClass, description, service, customValues);
+        return new SimpleModuleDescription(name, version, author, mainClass, description, service, customValues, depend);
     }
 
     @Override
     // inject all the collected and prepared modules
     public void injectCollectedModules() {
-        /*List<URL> urls = new ArrayList<>();
+        List<URL> urls = new ArrayList<>();
         for(File moduleFile : collectedModules.keySet()) {
             try {
                 urls.add(moduleFile.toURI().toURL());
@@ -164,11 +168,11 @@ public class ModuleLoader implements IModuleLoader {
                 e.printStackTrace();
             }
         }
-        StaticClassloader classLoader = new StaticClassloader(urls.toArray(new URL[0]), ModuleLoader.class.getClassLoader());*/
+        StaticClassloader classLoader = new StaticClassloader(urls.toArray(new URL[0]), ModuleLoader.class.getClassLoader());
         for(File moduleFile : collectedModules.keySet()) {
             try {
                 SimpleModuleDescription description = collectedModules.get(moduleFile);
-                StaticClassloader classLoader = new StaticClassloader(new URL[]{moduleFile.toURI().toURL()}, ModuleLoader.class.getClassLoader());
+                //StaticClassloader classLoader = new StaticClassloader(new URL[]{moduleFile.toURI().toURL()}, ModuleLoader.class.getClassLoader());
 
                 Class c = Class.forName(description.getMainClass(), true, classLoader);
                 Object instance = c.newInstance();
@@ -180,10 +184,10 @@ public class ModuleLoader implements IModuleLoader {
                     loadConfigManager(module);
                     Core.loggerInstance.logMessage("Injected module: " + description.getName());
                 }
-            } catch(MalformedURLException e) {
+            } /*catch(MalformedURLException e) {
                 Core.loggerInstance.logMessage("Error while loading module: " + moduleFile.getAbsolutePath());
                 e.printStackTrace();
-            } catch(ClassNotFoundException e) {
+            }*/ catch(ClassNotFoundException e) {
                 Core.loggerInstance.logError("Error while loading module: " + moduleFile.getAbsolutePath() + " Main class not found");
             } catch(InstantiationException e) {
                 Core.loggerInstance.logError("Error while loading module: " + moduleFile.getAbsolutePath() + " Cannot create a new instance of main class");

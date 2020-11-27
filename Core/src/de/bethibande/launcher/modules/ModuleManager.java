@@ -1,5 +1,6 @@
 package de.bethibande.launcher.modules;
 
+import de.bethibande.launcher.Core;
 import de.bethibande.launcher.modules.loader.IModuleHandle;
 import de.bethibande.launcher.modules.loader.IModuleLoader;
 import de.bethibande.launcher.modules.loader.ModuleLoader;
@@ -23,6 +24,7 @@ public class ModuleManager implements IModuleManager {
     public void start() {
         moduleLoader.injectCollectedModules();
         moduleLoader.enableAllModules();
+        Core.eventManager.runEvent(new ModulesLoadedEvent());
     }
 
     @Override
