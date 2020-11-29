@@ -68,7 +68,6 @@ public class Core {
         loggerInstance.logMessage("Initialized all default commands.");
 
         loggerInstance.logMessage("Bootstrap finished!");
-
     }
 
     public static void shutdown(int exitCode) {

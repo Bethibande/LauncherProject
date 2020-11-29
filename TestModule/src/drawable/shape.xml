@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<shape id="roundedShape" xmlns:ui="http://www.w3.org/2001/XMLSchema-instance"
+    ui:shape="rounded_rectangle"
+    ui:cornerSize="1.5"/>

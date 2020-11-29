@@ -1,11 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- test -->
-<root xmlns:launcher="http://www.w3.org/2001/XMLSchema-instance" launcher:background="@color/colorPrimary">
+<layout xmlns:ui="http://www.w3.org/2001/XMLSchema-instance" id="test" ui:background="@color/colorPrimary" ui:drawable="@drawable/highlightGradient">
     <!-- only ideas not final yet! -->
     <label
-    launcher:icon="@drawable/icons/Icon.png"
-    launcher:top="10dp"
-    launcher:left="10dp"
-    launcher:height="10dp"
-    launcher:width="80dp"/>
-</root>
+            ui:text="Hello world!"
+            ui:top="10"
+            ui:left="10"
+            ui:height="20"
+            ui:width="80"
+            ui:verticalAlign="ALIGN_CENTER"
+            ui:horizontalAlign="ALIGN_CENTER"
+            ui:foreground="@color/colorText"/>
+</layout>

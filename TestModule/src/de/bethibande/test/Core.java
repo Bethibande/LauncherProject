@@ -9,6 +9,12 @@ import de.bethibande.launcher.networking.encryption.RSA;
 import de.bethibande.launcher.networking.events.ConnectorBufferReceivedEvent;
 import de.bethibande.launcher.networking.server.SimpleNetworkServer;
 import de.bethibande.launcher.ui.UiManager;
+import de.bethibande.launcher.ui.components.UiComponent;
+import de.bethibande.launcher.ui.components.UiLabel;
+import de.bethibande.launcher.ui.drawable.UiDrawOrder;
+import de.bethibande.launcher.ui.drawable.UiDrawable;
+import de.bethibande.launcher.ui.drawable.UiGradient;
+import de.bethibande.launcher.ui.drawable.UiShape;
 
 public class Core extends Module {
 
@@ -37,7 +43,25 @@ public class Core extends Module {
         uiTest.setScheme(uiTest.loadScheme(getClass().getResourceAsStream("/schemes/test.scheme")));
         de.bethibande.launcher.Core.loggerInstance.logMessage("colorPrimary: " + uiTest.getResource("@color/colorPrimary"));
 
-        int buffer_size = 1024*4;
+        UiGradient gradient = (UiGradient)uiTest.loadDrawable(getClass().getResourceAsStream("/drawable/gradient.xml"));
+        UiShape shape = (UiShape)uiTest.loadDrawable(getClass().getResourceAsStream("/drawable/shape.xml"));
+        UiDrawOrder order = (UiDrawOrder)uiTest.loadDrawable(getClass().getResourceAsStream("/drawable/highlightPanel.xml"));
+        System.out.println("drawable: id: " + gradient.getId() + " angle: " + gradient.getAngle() + " startColor: " + gradient.getStartColor() + " endColor: " + gradient.getEndColor());
+        System.out.println("drawable: id: " + shape.getId() + " shape: " + shape.getShape() + " cornerSize: " + shape.getCornerSize());
+        System.out.println("drawable: id: " + order.getId() + " children: ");
+        int i = 0;
+        for(UiDrawable d : order.getChildren()) {
+            System.out.println(i + ": id:" + d.getId());
+            i++;
+        }
+
+        UiComponent layout = uiTest.loadUiComponent(getClass().getResourceAsStream("/ui/test.ui"));
+        System.out.println("layout: id: " + layout.getId() + " background: " + layout.getBackground());
+        for(UiComponent child : layout.getChildren()) {
+            System.out.println("child: text: " + ((UiLabel)child).getText());
+        }
+
+        /*int buffer_size = 1024*4;
         boolean encryption = true;
         SimpleNetworkServer sms = new SimpleNetworkServer(22222, buffer_size, encryption, 5000);
         sms.start();
@@ -60,7 +84,7 @@ public class Core extends Module {
         ssc.sendBufferToServer("Hallo Server :D".getBytes());
         sms.getSubServers().get(0).sendBufferToClient("Hallo Client :D".getBytes());
 
-        //ssc.disconnect();
+        //ssc.disconnect();*/
 
     }
 

@@ -2,8 +2,8 @@
 <!-- test -->
 <scheme>
 
-    <color name="colorPrimary">#2E323E</color>
-    <color name="colorPrimaryDark">#232730</color>
+    <color name="colorPrimary">#1f2b37</color>
+    <color name="colorPrimaryDark">#182430</color>
     <color name="colorAccent">#388E3C</color>
     <color name="colorText">#ffffff</color>
 

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<gradient id="highlightGradient" xmlns:ui="http://www.w3.org/2001/XMLSchema-instance"
+          ui:startColor="@color/gradientA"
+          ui:endColor="@color/gradientB"
+          ui:angle="90"/>

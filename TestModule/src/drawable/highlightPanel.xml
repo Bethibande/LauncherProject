@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<drawOrder id="highlightPanel">
+    <item res="@drawable/roundedShape"/>
+    <item res="@drawable/highlightGradient"/>
+</drawOrder>

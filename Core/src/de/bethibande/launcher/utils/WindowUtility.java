@@ -6,7 +6,7 @@ import java.awt.*;
 
 public class WindowUtility {
 
-    private static java.awt.Dimension sSize = Toolkit.getDefaultToolkit().getScreenSize();;
+    public static final java.awt.Dimension sSize = Toolkit.getDefaultToolkit().getScreenSize();;
 
     // set rendering hints for graphics context and clear it
     public static void setRenderingHintsAndClear(Graphics2D g2d, Color clearColor) {
