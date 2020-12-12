@@ -43,6 +43,7 @@ public class Core extends Module {
         de.bethibande.launcher.Core.loggerInstance.logMessage(smc.get("test") + " " + gmc.get("test"));
 
         WebServer webServer = new WebServer(9967, 2048, new File("webserver/"));
+        webServer.getConfig().registerError(404, new File("webserver/404.html"));
         webServer.start();
 
         new Thread(() -> {

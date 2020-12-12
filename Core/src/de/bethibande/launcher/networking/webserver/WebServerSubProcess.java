@@ -52,6 +52,7 @@ public class WebServerSubProcess extends Thread {
                             while ((read = fileIn.read(copyBuffer)) > 0) {
                                 out.write(copyBuffer, 0, read);
                                 out.flush();
+                                copyBuffer = new byte[this.buffer_size];
                             }
                         } catch (IOException e) {
                             e.printStackTrace();
@@ -73,6 +74,7 @@ public class WebServerSubProcess extends Thread {
                             while ((read = fileIn.read(copyBuffer)) > 0) {
                                 out.write(copyBuffer, 0, read);
                                 out.flush();
+                                copyBuffer = new byte[this.buffer_size];
                             }
                         } catch (IOException e) {
                             e.printStackTrace();
@@ -123,48 +125,45 @@ public class WebServerSubProcess extends Thread {
         switch (code) {
             case 400:
                 writer.println("HTTP/1.1 400 Bad Request");
-                writer.println("Connection: close");
-                writer.println("Date: " + new Date());
                 break;
             case 403:
                 writer.println("HTTP/1.1 403 FORBIDDEN");
-                writer.println("Connection: close");
-                writer.println("Date: " + new Date());
                 break;
             case 404:
                 writer.println("HTTP/1.1 404 Not Found");
-                writer.println("Connection: close");
-                writer.println("Date: " + new Date());
                 break;
             case 405:
                 writer.println("HTTP/1.1 405 Method Not Allowed");
-                writer.println("Connection: close");
-                writer.println("Date: " + new Date());
                 break;
             case 500:
                 writer.println("HTTP/1.1 500 Internal Server Error");
-                writer.println("Connection: close");
-                writer.println("Date: " + new Date());
                 break;
         }
+        writer.println("Connection: close");
+        writer.println("Date: " + new Date());
+
         WebServer ws = (WebServer)this.owner;
         File errorFile = ws.getConfig().getErrorPage(code);
         if(errorFile != null && errorFile.exists()) {
             try {
                 writer.println("Content-Length: " + errorFile.length());
-                writer.println("\n");
+                writer.println();
+                writer.flush();
                 byte[] copyBuffer = new byte[this.buffer_size];
                 int read;
                 InputStream in = new FileInputStream(errorFile);
                 while((read = in.read(copyBuffer)) > 0) {
                     out.write(copyBuffer, 0, read);
                     out.flush();
+                    copyBuffer = new byte[this.buffer_size];
                 }
             } catch(IOException e) {
                 e.printStackTrace();
             }
-        } else writer.println("Content-Length: 0");
-        writer.flush();
+        } else {
+            writer.println("Content-Length: 0");
+            writer.flush();
+        }
     }
 
 }
