@@ -6,6 +6,6 @@ public interface IWebSite {
     void linkScript(String url);
     void setHeader(String header);
 
-    void handleRequest(IWebRequest request);
+    void handleRequest(WebRequest request);
 
 }
