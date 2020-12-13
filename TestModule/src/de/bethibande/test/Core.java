@@ -9,6 +9,7 @@ import de.bethibande.launcher.networking.encryption.RSA;
 import de.bethibande.launcher.networking.events.ConnectorBufferReceivedEvent;
 import de.bethibande.launcher.networking.server.SimpleNetworkServer;
 import de.bethibande.launcher.networking.webserver.WebServer;
+import de.bethibande.launcher.networking.webserver.virtual.ApiWebServer;
 import de.bethibande.launcher.ui.UiManager;
 import de.bethibande.launcher.ui.components.UiComponent;
 import de.bethibande.launcher.ui.components.UiLabel;
@@ -25,7 +26,7 @@ public class Core extends Module {
     public void onEnable() {
         de.bethibande.launcher.Core.loggerInstance.logMessage("Test module has been enabled!!!");
 
-        if(!getConfigManager().configExists("test-config")) {
+        /*if(!getConfigManager().configExists("test-config")) {
             getConfigManager().createGsonConfig("test-config");
         }
         if(!getConfigManager().configExists("test-config2")) {
@@ -40,22 +41,25 @@ public class Core extends Module {
 
         de.bethibande.launcher.Core.eventManager.registerListener(new TestListener(), this);
         de.bethibande.launcher.Core.eventManager.runEvent(new TestEvent());
-        de.bethibande.launcher.Core.loggerInstance.logMessage(smc.get("test") + " " + gmc.get("test"));
+        de.bethibande.launcher.Core.loggerInstance.logMessage(smc.get("test") + " " + gmc.get("test"));*/
 
         WebServer webServer = new WebServer(9967, 2048, new File("webserver/"));
         webServer.getConfig().registerError(404, new File("webserver/404.html"));
         webServer.start();
 
-        new Thread(() -> {
+        ApiWebServer apiServer = new ApiWebServer(9968, 2048);
+        apiServer.start();
+
+        /*new Thread(() -> {
             while(true) {
-                de.bethibande.launcher.Core.loggerInstance.logMessage("Average webserver response time: " + webServer.getAverageResponseTime() + " ms");
+                de.bethibande.launcher.Core.loggerInstance.logMessage("Average webserver response time: " + webServer.getAverageResponseTime() + " ms " + apiServer.getAverageResponseTime() + " ms");
                 try {
                     Thread.sleep(1000);
                 } catch(InterruptedException e) { e.printStackTrace(); }
             }
-        }).start();
+        }).start();*/
 
-        UiManager uiTest = new UiManager();
+        /*UiManager uiTest = new UiManager();
         uiTest.setScheme(uiTest.loadScheme(getClass().getResourceAsStream("/schemes/test.scheme")));
         de.bethibande.launcher.Core.loggerInstance.logMessage("colorPrimary: " + uiTest.getResource("@color/colorPrimary"));
 
@@ -75,7 +79,7 @@ public class Core extends Module {
         System.out.println("layout: id: " + layout.getId() + " background: " + layout.getBackground());
         for(UiComponent child : layout.getChildren()) {
             System.out.println("child: text: " + ((UiLabel)child).getText());
-        }
+        }*/
 
         /*int buffer_size = 1024*4;
         boolean encryption = true;

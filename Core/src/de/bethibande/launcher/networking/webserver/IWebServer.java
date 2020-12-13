@@ -13,6 +13,8 @@ public interface IWebServer {
     int getConnections();
     // set the root directory
     void setWebServerRoot(File root);
+    // get the root directory of the webserver
+    File getWebServerRoot();
     // set allowed http methods
     void setAllowedMethods(HTTPConnectionMethod... methods);
     // get all allowed http methods

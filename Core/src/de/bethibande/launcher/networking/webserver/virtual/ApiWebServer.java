@@ -1,7 +1,9 @@
-package de.bethibande.launcher.networking.webserver;
+package de.bethibande.launcher.networking.webserver.virtual;
 
+import de.bethibande.launcher.networking.webserver.HTTPConnectionMethod;
+import de.bethibande.launcher.networking.webserver.IWebServer;
+import de.bethibande.launcher.networking.webserver.ServerConfig;
 import lombok.Getter;
-import lombok.Setter;
 
 import java.io.File;
 import java.io.IOException;
@@ -10,36 +12,50 @@ import java.net.Socket;
 import java.util.HashMap;
 import java.util.LinkedList;
 
-public class WebServer extends Thread implements IWebServer {
+public class ApiWebServer extends Thread implements IWebServer {
 
     @Getter
     private final int port;
     @Getter
     private final int buffer_size;
     @Getter
-    @Setter
-    private File webServerRoot;
-    @Getter
     private HTTPConnectionMethod[] allowedConnectionMethods;
     @Getter
     private final ServerConfig config = new ServerConfig();
 
-    private final HashMap<Socket, WebServerSubProcess> connections = new HashMap<>();
+    private final HashMap<Socket, ApiSubProcess> connections = new HashMap<>();
 
     private final LinkedList<Integer> responseTimes = new LinkedList<>();
     @Getter
     private int averageResponseTime = 0;
+    @Getter
+    private final LinkedList<RequestHandler> handlers = new LinkedList<>();
 
-    public WebServer(int port, int buffer_size, File root) {
+    public ApiWebServer(int port, int buffer_size) {
         this.port = port;
         this.buffer_size = buffer_size;
-        this.webServerRoot = root;
         setAllowedMethods(HTTPConnectionMethod.GET);
+    }
+
+    public void registerHandler(RequestHandler handler) {
+        this.handlers.add(handler);
+    }
+
+    public void unregisterHandler(RequestHandler handler) {
+        this.handlers.remove(handler);
     }
 
     @Override
     public int getConnections() {
         return this.connections.size();
+    }
+
+    @Override
+    public void setWebServerRoot(File root) { }
+
+    @Override
+    public File getWebServerRoot() {
+        return new File(".");
     }
 
     @Override
@@ -67,7 +83,7 @@ public class WebServer extends Thread implements IWebServer {
             ServerSocket server = new ServerSocket(this.port);
             while(true) {
                 Socket client = server.accept();
-                WebServerSubProcess wssp = new WebServerSubProcess(client, this, this.buffer_size);
+                ApiSubProcess wssp = new ApiSubProcess(client, this, this.buffer_size);
                 this.connections.put(client, wssp);
                 wssp.start();
             }
