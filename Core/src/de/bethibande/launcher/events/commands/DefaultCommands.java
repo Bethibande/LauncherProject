@@ -7,6 +7,7 @@ import de.bethibande.launcher.events.Listener;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class DefaultCommands implements Listener {
 
@@ -14,7 +15,7 @@ public class DefaultCommands implements Listener {
 
     static {
         commands.add("stop (-h delay) | delay in seconds");
-        commands.add("help | show a list of available commands");
+        commands.add("help (command) | show a list of available commands");
     }
 
     @EventHandler
@@ -45,12 +46,24 @@ public class DefaultCommands implements Listener {
                 }
                 break;
             case "help":
-                Core.loggerInstance.logMessage("Help - Commands");
-                Core.loggerInstance.logMessage("");
-                for(String command : commands) {
-                    Core.loggerInstance.logMessage("  " + command);
+                if(args.length == 2) {
+                    for(String command : commands) {
+                        if(command.toLowerCase().startsWith(args[1].toLowerCase())) {
+                            Core.loggerInstance.logMessage("Help - " + args[1]);
+                            Core.loggerInstance.logMessage("  " + command);
+                            Core.loggerInstance.logMessage("");
+                            return;
+                        }
+                    }
+                    Core.loggerInstance.logMessage("Help - There is no such command: " + args[1]);
+                } else {
+                    Core.loggerInstance.logMessage("Help - Commands");
+                    Core.loggerInstance.logMessage("");
+                    for (String command : commands) {
+                        Core.loggerInstance.logMessage("  " + command);
+                    }
+                    Core.loggerInstance.logMessage("");
                 }
-                Core.loggerInstance.logMessage("");
                 break;
         }
     }

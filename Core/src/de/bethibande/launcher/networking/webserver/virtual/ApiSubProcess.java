@@ -42,11 +42,14 @@ public class ApiSubProcess extends Thread {
                 String uri = header[0].split(" ")[1];
                 HashMap<String, String> queryArguments = new HashMap<>();
                 if(uri.contains("?")) {
-                    uri = uri.split("\\?")[0];
                     String[] query = uri.split("\\?")[1].split("&");
+                    uri = uri.split("\\?")[0];
                     for(String q : query) {
-                        String k = q.split("=")[0];
-                        String v = q.split("=")[1];
+                        String k = q, v = null;
+                        if(q.contains("=")) {
+                            k = q.split("=")[0];
+                            v= q.substring(k.length()+1);
+                        }
                         queryArguments.put(k, v);
                     }
                 }

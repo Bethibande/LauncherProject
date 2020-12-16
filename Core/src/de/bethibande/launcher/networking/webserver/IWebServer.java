@@ -23,6 +23,8 @@ public interface IWebServer {
     void start();
     // average response time in ms
     int getAverageResponseTime();
+    // close the webserver
+    void close();
 
     void connectionClosed(Socket s, int responseTime);
 

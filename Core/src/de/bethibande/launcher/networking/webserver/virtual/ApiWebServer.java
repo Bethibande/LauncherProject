@@ -31,6 +31,8 @@ public class ApiWebServer extends Thread implements IWebServer {
     @Getter
     private final LinkedList<RequestHandler> handlers = new LinkedList<>();
 
+    private ServerSocket server;
+
     public ApiWebServer(int port, int buffer_size) {
         this.port = port;
         this.buffer_size = buffer_size;
@@ -80,9 +82,9 @@ public class ApiWebServer extends Thread implements IWebServer {
     @Override
     public void run() {
         try {
-            ServerSocket server = new ServerSocket(this.port);
+            this.server = new ServerSocket(this.port);
             while(true) {
-                Socket client = server.accept();
+                Socket client = this.server.accept();
                 ApiSubProcess wssp = new ApiSubProcess(client, this, this.buffer_size);
                 this.connections.put(client, wssp);
                 wssp.start();
@@ -92,4 +94,15 @@ public class ApiWebServer extends Thread implements IWebServer {
         }
     }
 
+    @Override
+    public void close() {
+        if(!this.server.isClosed()) {
+            try {
+                interrupt();
+                this.server.close();
+            } catch(IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 }

@@ -30,6 +30,8 @@ public class WebServer extends Thread implements IWebServer {
     @Getter
     private int averageResponseTime = 0;
 
+    private ServerSocket server;
+
     public WebServer(int port, int buffer_size, File root) {
         this.port = port;
         this.buffer_size = buffer_size;
@@ -64,15 +66,27 @@ public class WebServer extends Thread implements IWebServer {
     @Override
     public void run() {
         try {
-            ServerSocket server = new ServerSocket(this.port);
+            this.server = new ServerSocket(this.port);
             while(true) {
-                Socket client = server.accept();
+                Socket client = this.server.accept();
                 WebServerSubProcess wssp = new WebServerSubProcess(client, this, this.buffer_size);
                 this.connections.put(client, wssp);
                 wssp.start();
             }
         } catch(IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void close() {
+        if(!this.server.isClosed()) {
+            try {
+                interrupt();
+                this.server.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
