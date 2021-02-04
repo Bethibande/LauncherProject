@@ -53,7 +53,9 @@ public class WindowUpdater extends Thread implements IWindowUpdater {
                 stoppedAnimators.forEach(this.animators::remove);
                 stoppedAnimators.clear();
 
-                Thread.sleep((1000/handle.getFPS())-(finished-started));
+                long timeout = (1000/handle.getFPS())-(finished-started);
+                if(timeout <= 0) timeout = 1000/ handle.getFPS();
+                Thread.sleep(timeout);
                 if(!this.closeRequested) this.closeRequested = handle.isCloseRequested();
             }
         } catch(InterruptedException e) {

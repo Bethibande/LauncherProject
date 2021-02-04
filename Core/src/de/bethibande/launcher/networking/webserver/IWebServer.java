@@ -1,9 +1,11 @@
 package de.bethibande.launcher.networking.webserver;
 
+import de.bethibande.launcher.networking.server.INetworkServer;
+
 import java.io.File;
 import java.net.Socket;
 
-public interface IWebServer {
+public interface IWebServer extends INetworkServer {
 
     int maxResponseTimeTracking = 20;
 

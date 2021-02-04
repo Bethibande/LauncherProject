@@ -9,9 +9,13 @@ import java.util.HashMap;
 public class WebRequest {
 
     @Getter
+    private final String method;
+    @Getter
     private final String uri;
     @Getter
     private final HashMap<String, String> queryArguments;
+    @Getter
+    private final int content_length;
     @Getter
     private final Socket client;
 
@@ -26,7 +30,7 @@ public class WebRequest {
     private String content_type = "text/json";
     @Getter
     @Setter
-    private String response_payload = "{\"Status\":\"Success!\"}";
+    private INetworkResourceProvider response_payload = new StringProvider("{\"Status\":\"Success!\"}");
     @Getter
     @Setter
     // this will be used for the Location: tag in the response header
@@ -35,9 +39,16 @@ public class WebRequest {
     @Setter
     private boolean send_payload = true;
 
-    public WebRequest(String uri, HashMap<String, String> queryArguments, Socket socket) {
+    @Getter
+    @Setter
+    // add custom arguments/keys to response header
+    private HashMap<String, String> customResponseHeader = new HashMap<>();
+
+    public WebRequest(String method, String uri, HashMap<String, String> queryArguments, int content_length, Socket socket) {
+        this.method = method;
         this.uri = uri;
         this.queryArguments = queryArguments;
+        this.content_length = content_length;
         this.client = socket;
     }
 

@@ -1,5 +1,7 @@
 package de.bethibande.launcher.networking.server;
 
+import de.bethibande.launcher.networking.logging.IServerLogger;
+
 import java.net.Socket;
 
 public interface INetworkServer {
@@ -15,6 +17,8 @@ public interface INetworkServer {
     // stops/closes the server
     void close();
 
+    // add a server logger which will log the activity of the server
+    INetworkServer log(IServerLogger logger);
 
     void handleConnection(Socket s);
 

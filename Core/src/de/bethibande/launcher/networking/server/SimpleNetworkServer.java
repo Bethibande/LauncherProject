@@ -2,6 +2,8 @@ package de.bethibande.launcher.networking.server;
 
 import de.bethibande.launcher.Core;
 import de.bethibande.launcher.networking.events.SubServerBufferReceivedEvent;
+import de.bethibande.launcher.networking.logging.IServerLogSession;
+import de.bethibande.launcher.networking.logging.IServerLogger;
 import de.bethibande.launcher.utils.TimeUtils;
 import lombok.Getter;
 
@@ -26,8 +28,10 @@ public class SimpleNetworkServer extends NetworkServer implements INetworkServer
     private final List<NetworkSubServer> pinged = new ArrayList<>();
     @Getter
     private final int buffer_size;
-
+    @Getter
     private PingThread pt;
+    @Getter
+    private IServerLogger logger;
 
     @Getter
     private int pingTimeOut = 5000;
@@ -56,11 +60,13 @@ public class SimpleNetworkServer extends NetworkServer implements INetworkServer
 
     public void subServerClosed(NetworkSubServer subServer) {
         this.subServers.remove(subServer);
+        if(this.logger != null) this.logger.endSession(subServer.getLoggerSession());
     }
 
     @Override
     public void handleConnection(Socket s) {
-        NetworkSubServer subServer = new NetworkSubServer(s, this.buffer_size, this.useEncryption(), this);
+        IServerLogSession sls = this.logger == null ? null: this.logger.createSession(s.getInetAddress().getHostAddress(), s.getPort());
+        NetworkSubServer subServer = new NetworkSubServer(s, this.buffer_size, this.useEncryption(), this, sls);
         subServer.action(buffer -> { Core.eventManager.runEvent(new SubServerBufferReceivedEvent(buffer, subServer)); });
         subServer.start();
         this.subServers.add(subServer);
@@ -68,6 +74,13 @@ public class SimpleNetworkServer extends NetworkServer implements INetworkServer
 
     public static void sendBufferToClient(byte[] buffer, NetworkSubServer client) {
         client.sendBufferToClient(buffer);
+    }
+
+    @Override
+    public INetworkServer log(IServerLogger logger) {
+        this.logger = logger;
+        this.logger.setServer(this);
+        return this;
     }
 
     public static class PingThread extends Thread {

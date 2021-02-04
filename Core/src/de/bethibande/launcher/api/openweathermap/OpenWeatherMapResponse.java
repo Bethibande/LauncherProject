@@ -11,7 +11,7 @@ public class OpenWeatherMapResponse implements Serializable {
 
     @Getter
     @Setter
-    private String json;
+    private transient String json;
 
     @Getter
     private final OpenWeatherMapCoordinates coord;

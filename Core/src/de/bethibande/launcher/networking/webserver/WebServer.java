@@ -1,5 +1,8 @@
 package de.bethibande.launcher.networking.webserver;
 
+import de.bethibande.launcher.networking.logging.IServerLogSession;
+import de.bethibande.launcher.networking.logging.IServerLogger;
+import de.bethibande.launcher.networking.server.INetworkServer;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -32,6 +35,9 @@ public class WebServer extends Thread implements IWebServer {
 
     private ServerSocket server;
 
+    @Getter
+    private IServerLogger logger;
+
     public WebServer(int port, int buffer_size, File root) {
         this.port = port;
         this.buffer_size = buffer_size;
@@ -52,6 +58,7 @@ public class WebServer extends Thread implements IWebServer {
     @Override
     public void connectionClosed(Socket s, int responseTime) {
         this.connections.remove(s);
+        if(this.logger != null) this.logger.endSession(s.getInetAddress().getHostAddress(), s.getPort());
         if(responseTime >= 0) {
             this.responseTimes.add(responseTime);
             if(this.responseTimes.size() > IWebServer.maxResponseTimeTracking) this.responseTimes.remove(0);
@@ -69,13 +76,29 @@ public class WebServer extends Thread implements IWebServer {
             this.server = new ServerSocket(this.port);
             while(true) {
                 Socket client = this.server.accept();
-                WebServerSubProcess wssp = new WebServerSubProcess(client, this, this.buffer_size);
+                IServerLogSession sls = this.logger == null ? null: this.logger.createSession(client.getInetAddress().getHostAddress(), client.getPort());
+                WebServerSubProcess wssp = new WebServerSubProcess(client, this, this.buffer_size, sls);
                 this.connections.put(client, wssp);
                 wssp.start();
             }
         } catch(IOException e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public int getConnectedClients() {
+        return this.connections.size();
+    }
+
+    @Override
+    public boolean useEncryption() {
+        return false;
+    }
+
+    @Override
+    public boolean canConnect() {
+        return true;
     }
 
     @Override
@@ -88,6 +111,19 @@ public class WebServer extends Thread implements IWebServer {
                 e.printStackTrace();
             }
         }
+    }
+
+    @Override
+    public INetworkServer log(IServerLogger logger) {
+        this.logger = logger;
+        this.logger.setServer(this);
+        return this;
+    }
+
+    @Override
+    // !! Unused, no functionality !!
+    public void handleConnection(Socket s) {
+        System.out.println("unused: WebServer.handleConnection(Socket s);");
     }
 
 }

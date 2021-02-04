@@ -1,6 +1,7 @@
 package de.bethibande.launcher.networking.server;
 
 import de.bethibande.launcher.Core;
+import de.bethibande.launcher.networking.logging.IServerLogger;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -41,6 +42,9 @@ public class NetworkServer extends Thread implements INetworkServer {
             Core.loggerInstance.logError("Error while closing server task.");
         }
     }
+
+    @Override
+    public INetworkServer log(IServerLogger logger) { return this; }
 
     @Override
     public void run() {
