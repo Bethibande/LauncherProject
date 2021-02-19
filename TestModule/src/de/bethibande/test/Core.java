@@ -10,6 +10,7 @@ import de.bethibande.launcher.networking.events.ConnectorBufferReceivedEvent;
 import de.bethibande.launcher.networking.server.SimpleNetworkServer;
 import de.bethibande.launcher.networking.webserver.WebServer;
 import de.bethibande.launcher.networking.webserver.virtual.ApiWebServer;
+import de.bethibande.launcher.networking.webserver.virtual.StringProvider;
 import de.bethibande.launcher.ui.UiManager;
 import de.bethibande.launcher.ui.components.UiComponent;
 import de.bethibande.launcher.ui.components.UiLabel;
@@ -49,6 +50,12 @@ public class Core extends Module {
 
         ApiWebServer apiServer = new ApiWebServer(9968, 2048);
         apiServer.start();
+
+        apiServer.registerHandler(r -> {
+            if(r.getUri().toLowerCase().startsWith("/test")) {
+                r.setResponse_payload(new StringProvider("{\"Test\":\"Hallo\"}"));
+            }
+        });
 
         /*new Thread(() -> {
             while(true) {
