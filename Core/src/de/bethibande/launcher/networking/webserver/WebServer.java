@@ -113,7 +113,6 @@ public class WebServer extends Thread implements IWebServer {
         }
     }
 
-    @Override
     public INetworkServer log(IServerLogger logger) {
         this.logger = logger;
         this.logger.setServer(this);

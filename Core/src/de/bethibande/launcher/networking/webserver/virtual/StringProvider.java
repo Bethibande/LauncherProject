@@ -38,7 +38,7 @@ public class StringProvider implements INetworkResourceProvider {
     }
 
     @Override
-    public void rest() {
+    public void reset() {
         _index = 0;
         _next = true;
     }

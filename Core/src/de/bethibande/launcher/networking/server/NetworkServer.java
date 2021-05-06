@@ -43,7 +43,6 @@ public class NetworkServer extends Thread implements INetworkServer {
         }
     }
 
-    @Override
     public INetworkServer log(IServerLogger logger) { return this; }
 
     @Override

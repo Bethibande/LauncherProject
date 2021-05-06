@@ -1,11 +1,16 @@
 package de.bethibande.launcher.networking.webserver.virtual;
 
+import de.bethibande.launcher.networking.encryption.PrivateKey;
+import de.bethibande.launcher.networking.encryption.PublicKey;
+import de.bethibande.launcher.networking.encryption.RSA;
 import de.bethibande.launcher.networking.logging.IServerLogSession;
 import de.bethibande.launcher.networking.logging.NetworkPackageSource;
 import de.bethibande.launcher.networking.webserver.IWebServer;
 import de.bethibande.launcher.networking.webserver.WebServer;
 import de.bethibande.launcher.utils.ArrayUtils;
 import de.bethibande.launcher.utils.TimeUtils;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.*;
 import java.net.Socket;
@@ -21,13 +26,17 @@ public class ApiSubProcess extends Thread {
 
     private final int buffer_size;
 
-    private final IServerLogSession logSession;
+    @Getter
+    @Setter
+    private PublicKey encryptionKey;
+    @Getter
+    @Setter
+    private PrivateKey decryptionKey;
 
-    public ApiSubProcess(Socket s, ApiWebServer parent, int buffer_size, IServerLogSession logSession) {
+    public ApiSubProcess(Socket s, ApiWebServer parent, int buffer_size) {
         this.socket = s;
         this.parent = parent;
         this.buffer_size = buffer_size;
-        this.logSession = logSession;
     }
 
     @Override
@@ -37,24 +46,35 @@ public class ApiSubProcess extends Thread {
         try {
             InputStream in = this.socket.getInputStream();
             OutputStream out = this.socket.getOutputStream();
-
             byte[] buffer = new byte[this.buffer_size];
+
+            for(IConnectionHandler handler : this.parent.getConnectionHandlers()) {
+                handler.handle(this.socket, this.parent, this);
+            }
+
             int read = in.read(buffer);
+            buffer = ArrayUtils.trim(buffer, 0, read);
+            if(decryptionKey != null) buffer = RSA.decryptData(buffer, decryptionKey);
+
             start = TimeUtils.getTimeInMillis();
 
-            String[] header = new String(buffer).split("\\n");
-            String method = header[0].split(" ")[0];
+            String[] headerArr = new String(buffer, StandardCharsets.UTF_8).split("\n");
+            String header = headerArr[0];
+            String method = header.split(" ")[0];
             int content_length = 0;
-            if(this.logSession != null) this.logSession.log(NetworkPackageSource.IN, buffer);
+            String receiveContentType = "text/json";
 
-            for(String s : header) {
+            for(String s : headerArr) {
                 if(s.toLowerCase().startsWith("content-length: ")) {
-                    content_length = Integer.parseInt(s.substring(16, s.length()-1));
+                    content_length = Integer.parseInt(s.trim().substring(16));
+                }
+                if(s.toLowerCase().startsWith("content-type: ")) {
+                    receiveContentType = s.trim().substring(14);
                 }
             }
 
             if(ArrayUtils.contains(this.parent.getAllowedConnectionMethods(), method)) {
-                String uri = header[0].split(" ")[1];
+                String uri = header.split(" ")[1];
                 HashMap<String, String> queryArguments = new HashMap<>();
                 if(uri.contains("?")) {
                     String[] query = uri.split("\\?")[1].split("&");
@@ -68,7 +88,7 @@ public class ApiSubProcess extends Thread {
                         queryArguments.put(k, v);
                     }
                 }
-                WebRequest request = new WebRequest(method, uri, queryArguments, content_length, this.socket);
+                WebRequest request = new WebRequest(method, uri, queryArguments, content_length, receiveContentType, this.socket);
                 try {
                     for (RequestHandler handler : this.parent.getHandlers()) {
                         handler.handleRequest(request);
@@ -84,11 +104,11 @@ public class ApiSubProcess extends Thread {
                 // write header
                 //--------------------------------------------------------------------------------------------
 
-                PrintWriter writer = new PrintWriter(out);
                 StringBuilder sb = new StringBuilder();
+                PrintWriter writer = new PrintWriter(out);
                 sb.append("HTTP/1.1 " + request.getResponse_code() + " " + request.getResponse_message() + "\n");
-                sb.append("Connection: close\n");
-                sb.append("Date: " + new Date() + "\n");
+                sb.append("Connection: Close\n");
+                sb.append("Date " + new Date() + "\n");
                 sb.append("Access-Control-Allow-Origin: *\n");
                 if(request.getRedirect() != null) {
                     sb.append("Location: " + request.getRedirect() + "\n");
@@ -97,6 +117,7 @@ public class ApiSubProcess extends Thread {
                 if(request.isSend_payload() && request.getResponse_payload() != null) {
                     sb.append("Content-Length: " + request.getResponse_payload().getTotalLength() + "\n");
                 } else sb.append("Content-Length: 0\n");
+
                 if(request.getContent_type() != null) {
                     sb.append("Content-Type: " + request.getContent_type() + "\n");
                 }
@@ -104,33 +125,33 @@ public class ApiSubProcess extends Thread {
                 // process custom header arguments
                 for(String s : request.getCustomResponseHeader().keySet()) {
                     String v = request.getCustomResponseHeader().get(s);
-                    sb.append(s).append(": ").append(v).append("\n");
+                    sb.append(s + ": " + v + "\n");
                 }
+                sb.append("\n");
 
-                writer.println(sb.toString());
-                writer.flush();
-                if(this.logSession != null) this.logSession.log(NetworkPackageSource.OUT, sb.toString().getBytes(StandardCharsets.UTF_8));
+                if(encryptionKey != null) {
+                    byte[] encryptedHeader = RSA.encryptString(sb.toString(), encryptionKey);
+                    out.write(encryptedHeader);
+                    out.flush();
+                } else {
+                    writer.print(sb.toString());
+                    writer.flush();
+                }
 
                 //--------------------------------------------------------------------------------------------
                 // read and process payload/content
                 //--------------------------------------------------------------------------------------------
                 if(content_length > 0) {
-                    buffer = new byte[this.buffer_size];
-                    int __read = 0;
-                    while ((read = in.read(buffer)) > 0) {
+                    if(this.parent.getDataHandler() != null) {
+                        IDataHandler handler = this.parent.getDataHandler();
                         try {
-                            for (IDataHandler handler : this.parent.getDataHandlers()) {
-                                handler.run(request, uri, buffer, read);
-                            }
-                        } catch (Exception e) {
+                            handler.run(request, in);
+                        } catch(IOException e) {
                             sendErrorHeader(500, out);
                             end = TimeUtils.getTimeInMillis();
                             this.parent.connectionClosed(this.socket, (int) (end - start));
                             return;
                         }
-                        if (this.logSession != null) this.logSession.log(NetworkPackageSource.IN, buffer);
-                        __read += read;
-                        if (__read <= content_length) break;
                     }
                 }
 
@@ -139,13 +160,19 @@ public class ApiSubProcess extends Thread {
                 //--------------------------------------------------------------------------------------------
                 INetworkResourceProvider nrp = request.getResponse_payload().setBufferSize(buffer_size);
                 if(nrp.getTotalLength() > 0) {
-                    nrp.rest();
+                    nrp.reset();
                     while(nrp.hasNext()) {
+                        buffer = new byte[buffer_size];
                         buffer = nrp.getNext();
                         if(buffer != null) {
-                            out.write(buffer, 0, buffer.length);
-                            out.flush();
-                            if (this.logSession != null) this.logSession.log(NetworkPackageSource.OUT, buffer);
+                            if(encryptionKey != null) {
+                                buffer = RSA.encryptData(buffer, encryptionKey);
+                                out.write(buffer, 0, buffer.length);
+                                out.flush();
+                            } else {
+                                out.write(buffer, 0, buffer.length);
+                                out.flush();
+                            }
                         } else break;
                     }
                 }
@@ -156,10 +183,18 @@ public class ApiSubProcess extends Thread {
                 end = TimeUtils.getTimeInMillis();
             } else sendErrorHeader(405, out);
 
-            this.socket.close();
-        } catch(IOException e) { }
+            while(true) {
+                if(!socket.isConnected() || socket.isClosed()) break;
+                Thread.sleep(100);
+            }
+            socket.close();
+        } catch(IOException | InterruptedException e) { }
         this.parent.connectionClosed(this.socket, (int)(end-start));
-        if(this.logSession != null) this.logSession.endSession();
+    }
+
+    private byte[] prepareStringForOutput(String s, boolean newLine) {
+        if(encryptionKey == null) return !newLine ? s.getBytes(StandardCharsets.UTF_8): (s + "\n").getBytes(StandardCharsets.UTF_8);
+        return !newLine ? RSA.encryptString(s, encryptionKey): ArrayUtils.join(RSA.encryptString(s, encryptionKey), "\n".getBytes(StandardCharsets.UTF_8));
     }
 
     public void sendErrorHeader(int code, OutputStream out) {
@@ -192,10 +227,8 @@ public class ApiSubProcess extends Thread {
         sb.append("Content-Type: text/json\n");
         writer.println(sb.toString());
         writer.flush();
-        if(this.logSession != null) this.logSession.log(NetworkPackageSource.OUT, sb.toString().getBytes(StandardCharsets.UTF_8));
         writer.println(error_content);
         writer.flush();
-        if(this.logSession != null) this.logSession.log(NetworkPackageSource.OUT, error_content.getBytes(StandardCharsets.UTF_8));
     }
 
 }

@@ -17,6 +17,8 @@ public class WebRequest {
     @Getter
     private final int content_length;
     @Getter
+    private final String receiveContentType;
+    @Getter
     private final Socket client;
 
     @Getter
@@ -44,11 +46,12 @@ public class WebRequest {
     // add custom arguments/keys to response header
     private HashMap<String, String> customResponseHeader = new HashMap<>();
 
-    public WebRequest(String method, String uri, HashMap<String, String> queryArguments, int content_length, Socket socket) {
+    public WebRequest(String method, String uri, HashMap<String, String> queryArguments, int content_length, String receiveContentType, Socket socket) {
         this.method = method;
         this.uri = uri;
         this.queryArguments = queryArguments;
         this.content_length = content_length;
+        this.receiveContentType = receiveContentType;
         this.client = socket;
     }
 

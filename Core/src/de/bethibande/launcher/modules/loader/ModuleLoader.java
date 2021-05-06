@@ -43,20 +43,25 @@ public class ModuleLoader implements IModuleLoader {
     private static Field gson_config_manager_field;
     private static Field simple_config_manager_field;*/
 
+    @Getter
+    private final File modulesPath;
+    @Getter
+    private final File moduleConfigPath;
+    @Getter
+    private final String moduleDescriptionFile;
+
+    public ModuleLoader(File _modulesPath, File _moduleConfigPath, String _moduleDescriptionFile) {
+        modulesPath = _modulesPath;
+        moduleConfigPath = _moduleConfigPath;
+        moduleDescriptionFile = _moduleDescriptionFile;
+    }
+
     static {
         try {
             module_description_field = Module.class.getDeclaredField("description");
             module_handle_field = Module.class.getDeclaredField("handle");
             module_manager_field = Module.class.getDeclaredField("manager");
             module_configManager_field = Module.class.getDeclaredField("configManager");
-
-            /*gson_config_manager_field = GsonModuleConfig.class.getDeclaredField("manager");
-            gson_config_module_field = GsonModuleConfig.class.getDeclaredField("owner");
-
-            simple_config_manager_field = SimpleModuleConfig.class.getDeclaredField("manager");
-            simple_config_module_field = SimpleModuleConfig.class.getDeclaredField("owner");
-
-            manager_module_field = ModuleConfigManager.class.getDeclaredField("owner");*/
         } catch(NoSuchFieldException e) {
             e.printStackTrace();
         }
@@ -64,14 +69,14 @@ public class ModuleLoader implements IModuleLoader {
 
     @Override
     public void initModuleDirectories() {
-        if(!IModuleLoader.modulesPath.exists()) {
-            if(!IModuleLoader.modulesPath.mkdir()) {
+        if(!modulesPath.exists()) {
+            if(!modulesPath.mkdir()) {
                 Core.loggerInstance.logError("Couldn't create modules directory!");
                 System.exit(IService.EXIT_COULD_NOT_CREATE_MODULES_PATH);
             }
         }
-        if(!IModuleLoader.moduleConfigPath.exists()) {
-            if(!IModuleLoader.moduleConfigPath.mkdir()) {
+        if(!moduleConfigPath.exists()) {
+            if(!moduleConfigPath.mkdir()) {
                 Core.loggerInstance.logError("Couldn't create modules directory!");
                 System.exit(IService.EXIT_COULD_NOT_CREATE_MODULES_CONFIG_PATH);
             }
@@ -82,7 +87,7 @@ public class ModuleLoader implements IModuleLoader {
     public void collectAvailableModules() {
         try {
             List<File> potentialModules = new ArrayList<>();
-            for (File f : Objects.requireNonNull(IModuleLoader.modulesPath.listFiles())) {
+            for (File f : Objects.requireNonNull(modulesPath.listFiles())) {
                 if (f.isFile()) {
                     if (f.getAbsolutePath().endsWith(".jar")) {
                         potentialModules.add(f);
@@ -92,7 +97,7 @@ public class ModuleLoader implements IModuleLoader {
             Core.loggerInstance.logMessage("Found a total of " + potentialModules.size() + " potential modules!");
             for (File f : potentialModules) {
                 JarFile jar = new JarFile(f);
-                ZipEntry entry = jar.getEntry("module.yml");
+                ZipEntry entry = jar.getEntry(moduleDescriptionFile);
                 if(entry != null) {
                     InputStream in = jar.getInputStream(entry);
                     try {
@@ -104,7 +109,7 @@ public class ModuleLoader implements IModuleLoader {
                             collectedModules.put(f, description);
                         }
                     } catch(InvalidModuleDescriptionException e) {
-                        Core.loggerInstance.logError("Invalid " + IModuleLoader.moduleDescriptionFileName + ": " + e.getMessage());
+                        Core.loggerInstance.logError("Invalid " + moduleDescriptionFileName + ": " + e.getMessage());
                     } catch(IOException e) { }
                 } else Core.loggerInstance.logMessage("Couldn't load jar: " + f + "!");
             }
@@ -151,7 +156,7 @@ public class ModuleLoader implements IModuleLoader {
         }
 
         if(name == null || mainClass == null) {
-            throw new InvalidModuleDescriptionException("Name and or main class not specified in " + IModuleLoader.moduleDescriptionFileName);
+            throw new InvalidModuleDescriptionException("Name and or main class not specified in " + moduleDescriptionFileName);
         }
         return new SimpleModuleDescription(name, version, author, mainClass, description, service, customValues, depend);
     }
@@ -168,26 +173,26 @@ public class ModuleLoader implements IModuleLoader {
                 e.printStackTrace();
             }
         }
-        StaticClassloader classLoader = new StaticClassloader(urls.toArray(new URL[0]), ModuleLoader.class.getClassLoader());
+        //StaticClassloader classLoader = new StaticClassloader(urls.toArray(new URL[0]), ModuleLoader.class.getClassLoader());
         for(File moduleFile : collectedModules.keySet()) {
             try {
                 SimpleModuleDescription description = collectedModules.get(moduleFile);
-                //StaticClassloader classLoader = new StaticClassloader(new URL[]{moduleFile.toURI().toURL()}, ModuleLoader.class.getClassLoader());
+                StaticClassloader classLoader = new StaticClassloader(new URL[]{moduleFile.toURI().toURL()}, ModuleLoader.class.getClassLoader());
 
                 Class c = Class.forName(description.getMainClass(), true, classLoader);
                 Object instance = c.newInstance();
                 if(instance instanceof Module) {
                     IModule module = (IModule)instance;
-                    SimpleModuleHandle handle = new SimpleModuleHandle(description, module, classLoader, moduleFile, new File(IModuleLoader.moduleConfigPath + "/" + description.getName() + "/"));
+                    SimpleModuleHandle handle = new SimpleModuleHandle(description, module, classLoader, moduleFile, new File(moduleConfigPath + "/" + description.getName() + "/"));
                     handles.add(handle);
                     setModuleVars((Module)module, description, handle);
                     loadConfigManager(module);
                     Core.loggerInstance.logMessage("Injected module: " + description.getName());
                 }
-            } /*catch(MalformedURLException e) {
+            } catch(MalformedURLException e) {
                 Core.loggerInstance.logMessage("Error while loading module: " + moduleFile.getAbsolutePath());
                 e.printStackTrace();
-            }*/ catch(ClassNotFoundException e) {
+            } catch(ClassNotFoundException e) {
                 Core.loggerInstance.logError("Error while loading module: " + moduleFile.getAbsolutePath() + " Main class not found");
             } catch(InstantiationException e) {
                 Core.loggerInstance.logError("Error while loading module: " + moduleFile.getAbsolutePath() + " Cannot create a new instance of main class");
@@ -220,23 +225,11 @@ public class ModuleLoader implements IModuleLoader {
             unloadModule(module.getHandle());
             return;
         }
-        /*try {
-            for (IModuleConfig config : manager.getConfigs()) {
-                overrideModuleConfigFields(config, manager, module);
-            }
-        } catch(Exception e) {
-            Core.loggerInstance.logError("Error while loading module: " + module.getName());
-            e.printStackTrace();
-        }*/
 
         try {
             module_configManager_field.setAccessible(true);
             module_configManager_field.set(module, manager);
             module_configManager_field.setAccessible(false);
-
-            /*manager_module_field.setAccessible(true);
-            manager_module_field.set(manager, module);
-            manager_module_field.setAccessible(false);*/
         } catch(IllegalAccessException e) {
             e.printStackTrace();
         }

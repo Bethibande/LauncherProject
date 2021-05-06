@@ -7,6 +7,7 @@ import de.bethibande.launcher.networking.webserver.HTTPConnectionMethod;
 import de.bethibande.launcher.networking.webserver.IWebServer;
 import de.bethibande.launcher.networking.webserver.ServerConfig;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.io.File;
 import java.io.IOException;
@@ -36,10 +37,10 @@ public class ApiWebServer extends Thread implements IWebServer {
     @Getter
     private final LinkedList<RequestHandler> handlers = new LinkedList<>();
     @Getter
-    private final List<IDataHandler> dataHandlers = new ArrayList<>();
-
+    private final LinkedList<IConnectionHandler> connectionHandlers = new LinkedList<>();
     @Getter
-    private IServerLogger logger;
+    @Setter
+    private IDataHandler dataHandler;
 
     private ServerSocket server;
 
@@ -57,12 +58,12 @@ public class ApiWebServer extends Thread implements IWebServer {
         this.handlers.remove(handler);
     }
 
-    public void registerDataHandler(IDataHandler handler) {
-        this.dataHandlers.add(handler);
+    public void registerConnectionHandler(IConnectionHandler handler) {
+        this.connectionHandlers.add(handler);
     }
 
-    public void unregisterDataHandler(IDataHandler handler) {
-        this.dataHandlers.remove(handler);
+    public void unregisterConnectionHandler(IConnectionHandler handler) {
+        this.connectionHandlers.remove(handler);
     }
 
     @Override
@@ -86,7 +87,6 @@ public class ApiWebServer extends Thread implements IWebServer {
     @Override
     public void connectionClosed(Socket s, int responseTime) {
         this.connections.remove(s);
-        if(this.logger != null) this.logger.endSession(s.getInetAddress().getHostAddress(), s.getPort());
         if(responseTime >= 0) {
             this.responseTimes.add(responseTime);
             if(this.responseTimes.size() > IWebServer.maxResponseTimeTracking) this.responseTimes.remove(0);
@@ -104,8 +104,7 @@ public class ApiWebServer extends Thread implements IWebServer {
             this.server = new ServerSocket(this.port);
             while(true) {
                 Socket client = this.server.accept();
-                IServerLogSession sls = this.logger == null ? null: this.logger.createSession(client.getInetAddress().getHostAddress(), client.getPort());
-                ApiSubProcess wssp = new ApiSubProcess(client, this, this.buffer_size, sls);
+                ApiSubProcess wssp = new ApiSubProcess(client, this, this.buffer_size);
                 this.connections.put(client, wssp);
                 wssp.start();
             }
@@ -139,13 +138,6 @@ public class ApiWebServer extends Thread implements IWebServer {
                 e.printStackTrace();
             }
         }
-    }
-
-    @Override
-    public INetworkServer log(IServerLogger logger) {
-        this.logger = logger;
-        this.logger.setServer(this);
-        return this;
     }
 
     @Override

@@ -10,7 +10,7 @@ public interface INetworkResourceProvider {
 
     boolean hasNext();
 
-    void rest();
+    void reset();
 
     byte[] getNext();
 

@@ -5,6 +5,8 @@ import de.bethibande.launcher.bootstrap.IArgumentParser;
 import de.bethibande.launcher.events.EventManager;
 import de.bethibande.launcher.events.commands.DefaultCommands;
 import de.bethibande.launcher.events.listeners.ConsoleListener;
+import de.bethibande.launcher.modules.IModule;
+import de.bethibande.launcher.modules.loader.IModuleLoader;
 import de.bethibande.launcher.service_client.ClientBootstrap;
 import de.bethibande.launcher.bootstrap.IService;
 import de.bethibande.launcher.service_server.ServerBootstrap;
@@ -54,7 +56,7 @@ public class Core {
 
         loggerInstance.logMessage("Starting module loader...");
 
-        moduleManager = new ModuleManager();
+        moduleManager = new ModuleManager(IModuleLoader.modulesPath, IModuleLoader.moduleConfigPath, IModuleLoader.moduleDescriptionFileName);
         moduleManager.initialize();
         moduleManager.start();
 

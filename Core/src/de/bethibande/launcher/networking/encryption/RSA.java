@@ -3,6 +3,7 @@ package de.bethibande.launcher.networking.encryption;
 import lombok.Getter;
 
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.util.Random;
 
@@ -52,6 +53,22 @@ public class RSA {
 
     public byte[] decrypt(byte[] message) {
         return (new BigInteger(message)).modPow(d, N).toByteArray();
+    }
+
+    public static byte[] encryptData(byte[] data, PublicKey key) {
+        return (new BigInteger(data).modPow(key.getE(), key.getN())).toByteArray();
+    }
+
+    public static byte[] encryptString(String s, PublicKey key) {
+        return (new BigInteger(s.getBytes(StandardCharsets.UTF_8)).modPow(key.getE(), key.getN())).toByteArray();
+    }
+
+    public static byte[] decryptData(byte[] data, PrivateKey key) {
+        return (new BigInteger(data).modPow(key.getD(), key.getN())).toByteArray();
+    }
+
+    public static String decryptString(byte[] data, PrivateKey key) {
+        return new String((new BigInteger(data).modPow(key.getD(), key.getN())).toByteArray(), StandardCharsets.UTF_8);
     }
 
 }

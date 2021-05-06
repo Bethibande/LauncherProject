@@ -6,6 +6,7 @@ import de.bethibande.launcher.modules.loader.IModuleLoader;
 import de.bethibande.launcher.modules.loader.ModuleLoader;
 import lombok.Getter;
 
+import java.io.File;
 import java.util.List;
 
 public class ModuleManager implements IModuleManager {
@@ -13,9 +14,22 @@ public class ModuleManager implements IModuleManager {
     @Getter
     private IModuleLoader moduleLoader;
 
+    @Getter
+    private final File modulePath;
+    @Getter
+    private final File configPath;
+    @Getter
+    private final String moduleDescriptionFile;
+
+    public ModuleManager(File _modulePath, File _configPath, String _moduleDescriptionFile) {
+        modulePath = _modulePath;
+        configPath = _configPath;
+        moduleDescriptionFile = _moduleDescriptionFile;
+    }
+
     @Override
     public void initialize() {
-        moduleLoader = new ModuleLoader();
+        moduleLoader = new ModuleLoader(modulePath, configPath, moduleDescriptionFile);
         moduleLoader.initModuleDirectories();
         moduleLoader.collectAvailableModules();
     }

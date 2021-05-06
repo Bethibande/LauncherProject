@@ -57,6 +57,21 @@ public class EventManager {
         }
     }
 
+    public void runEventAsync(Event e) {
+        new Thread(() -> {
+            if(!knownEvents.contains(e.getClass())) knownEvents.add(e.getClass());
+            for(IService s : e.getHandlers().getHandlers().keySet()) {
+                for(Handler l : e.getHandlers().getHandlers().get(s)) {
+                    try {
+                        l.getM().invoke(l.getListener(), e);
+                    } catch(Exception ex) {
+                        ex.printStackTrace();
+                    }
+                }
+            }
+        }).start();
+    }
+
     public void runEvent(Event e) {
         if(!knownEvents.contains(e.getClass())) knownEvents.add(e.getClass());
         for(IService s : e.getHandlers().getHandlers().keySet()) {

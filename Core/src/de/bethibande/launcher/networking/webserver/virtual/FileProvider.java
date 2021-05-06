@@ -44,7 +44,7 @@ public class FileProvider implements INetworkResourceProvider {
     }
 
     @Override
-    public void rest() {
+    public void reset() {
         _hasNext = true;
         _index = 0;
         try {
