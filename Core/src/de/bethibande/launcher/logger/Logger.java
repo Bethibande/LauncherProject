@@ -23,7 +23,7 @@ public class Logger implements ILogger {
                 System.err.println("Error while initializing the logger: The log file couldn't be created or is already existing!");
                 System.exit(IService.EXIT_COULD_NOT_CREATE_LOG_FILE);
             }
-            // open outputstream and create writer
+
             writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(file)));
             this.file = file;
         } catch(IOException e) {
@@ -33,33 +33,25 @@ public class Logger implements ILogger {
 
     // log a normal message
     public void logMessage(String message) {
-        // get the date for the time
         Date d = new Date();
-        // create the message that will be send to the console and logged
-        String logMessage = d.getHours() + ":" + d.getMinutes() + " [Thread/" + Thread.currentThread().getName() + "] " + message;
-        // print log message
+        String logMessage = String.format("%02d", d.getHours()) + ":" + String.format("%02d", d.getMinutes()) + " [Thread/" + Thread.currentThread().getName() + "] " + message;
+
         System.out.println(logMessage);
-        // print message to log file
         logMessageToFile(logMessage);
     }
 
     // log an error
     public void logError(String error) {
-        // get the date for the time
         Date d = new Date();
-        // create the message that will be send to the console and logged
-        String logMessage = d.getHours() + ":" + d.getMinutes() + " [Error in Thread/" + Thread.currentThread().getName() + "] " + error;
-        // print log message
+        String logMessage = String.format("%02d", d.getHours()) + ":" + String.format("%02d", d.getMinutes()) + " [Error in Thread/" + Thread.currentThread().getName() + "] " + error;
+
         System.err.println(logMessage);
-        // print message to log file
         logMessageToFile(logMessage);
     }
 
     // print the logged messages/erros to the log file
     private void logMessageToFile(String logMessage) {
-        // write log message to file
         writer.println(logMessage);
-        // flush stream
         writer.flush();
     }
 
